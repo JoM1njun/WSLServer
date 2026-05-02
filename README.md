@@ -7,3 +7,7 @@
 
 ## ai(Directory) => AI Model & AI Server
 ### Language : Python
+
+***
+
+## requirements.txt => Venv Settings
