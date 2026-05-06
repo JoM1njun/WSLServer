@@ -120,6 +120,11 @@ app.get("/api/workers/:workerId/sensors", async (req, res) => {
   }
 });
 
+// Create API (Post)
+// Update API (Patch)
+// Delete API (Delete)
+// Sensor Data Insert API (Post)
+
 app.get("/", (req, res) => {
   res.send("🔥 Node 서버 연결 성공!");
 });
