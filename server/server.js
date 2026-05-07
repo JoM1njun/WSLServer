@@ -3,7 +3,7 @@ import cors from "cors";
 import { pool } from "./db.js";
 
 const app = express();
-const PORT = process.env.PORT;
+const PORT = process.env.PORT || 3000;
 
 app.use(cors());
 app.use(express.json());
@@ -125,10 +125,196 @@ app.get("/api/workers/:workerId/sensors", async (req, res) => {
 // Delete API (Delete)
 // Sensor Data Insert API (Post)
 
+// 작업자 추가 INSERT
+app.post("/api/workers", async (req, res) => {
+  try {
+    const {
+      id,
+      name,
+      birthDate,
+      gender,
+      position,
+      bloodType,
+      emergencyContact,
+      disease,
+      departmentId
+    } = req.body;
+
+    const sql = `
+      INSERT INTO Worker
+      (ID, Name, Birth_date, Gender, Position, Blood_type, Emergency_contact, Disease, Department_id)
+      VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?)
+    `;
+
+    await pool.execute(sql, [
+      id,
+      name,
+      birthDate,
+      gender,
+      position,
+      bloodType,
+      emergencyContact,
+      disease,
+      departmentId
+    ]);
+
+    res.json({
+      success: true,
+      message: "작업자 추가 성공"
+    });
+  } catch (err) {
+    console.error(err);
+    res.status(500).json({
+      success: false,
+      message: "작업자 추가 실패"
+    });
+  }
+});
+
+// 작업자 수정 UPDATE
+app.put("/api/workers/:workerId", async (req, res) => {
+  try {
+    const { workerId } = req.params;
+
+    const {
+      name,
+      birthDate,
+      gender,
+      position,
+      bloodType,
+      emergencyContact,
+      disease,
+      departmentId
+    } = req.body;
+
+    const sql = `
+      UPDATE Worker
+      SET
+        Name = ?,
+        Birth_date = ?,
+        Gender = ?,
+        Position = ?,
+        Blood_type = ?,
+        Emergency_contact = ?,
+        Disease = ?,
+        Department_id = ?
+      WHERE ID = ?
+    `;
+
+    await pool.execute(sql, [
+      name,
+      birthDate,
+      gender,
+      position,
+      bloodType,
+      emergencyContact,
+      disease,
+      departmentId,
+      workerId
+    ]);
+
+    res.json({
+      success: true,
+      message: "작업자 수정 성공"
+    });
+  } catch (err) {
+    console.error(err);
+    res.status(500).json({
+      success: false,
+      message: "작업자 수정 실패"
+    });
+  }
+});
+
+// 작업자 삭제 DELETE
+app.delete("/api/workers/:workerId", async (req, res) => {
+  try {
+    const { workerId } = req.params;
+
+    const sql = `
+      DELETE FROM Worker
+      WHERE ID = ?
+    `;
+
+    await pool.execute(sql, [workerId]);
+
+    res.json({
+      success: true,
+      message: "작업자 삭제 성공"
+    });
+  } catch (err) {
+    console.error(err);
+    res.status(500).json({
+      success: false,
+      message: "작업자 삭제 실패"
+    });
+  }
+});
+
 app.get("/", (req, res) => {
   res.send("🔥 Node 서버 연결 성공!");
 });
 
 app.listen(PORT, "0.0.0.0", () => {
   console.log(`Server running on port ${PORT}`);
+});
+
+// Company Data Insert & Delete Test Code
+app.post("/api/company", async (req, res) => {
+  try {
+    const {
+      id,
+      companyName,
+      address,
+      phone,
+      createdAt,
+      updatedAt
+    } = req.body;
+
+    const sql =
+      'INSERT INTO company (ID, Company_Name, Address, Phone, created_at, updated_at) VALUES (?, ?, ?, ?, ?, ?)';
+
+    await pool.execute(sql, [
+      id,
+      companyName,
+      address,
+      phone,
+      createdAt,
+      updatedAt
+    ])
+    res.json({
+      success: true,
+      message: "회사 정보 추가 성공"
+    })
+  } catch (err) {
+    console.error(err);
+    res.status(500).json({
+      success: false,
+      message: "회사 정보 추가 실패"
+    });
+  }
+});
+
+app.delete("/api/company/:companyId", async (req, res) => {
+  try {
+    const { companyId } = req.params;
+
+    const sql = `
+      DELETE FROM company
+      WHERE ID = ?
+    `;
+
+    await pool.execute(sql, [companyId]);
+
+    res.json({
+      success: true,
+      message: "회사 삭제 성공"
+    });
+  } catch (err) {
+    console.error(err);
+    res.status(500).json({
+      success: false,
+      message: "회사 삭제 실패"
+    });
+  }
 });
