@@ -1,14 +1,12 @@
 import express from "express";
 import {
-  insertSensor,
-  deleteSensor,
-  getSensors
+  getLatestSensorData,
+  getWorkerSensorData
 } from "../controllers/sensorController.js";
 
 const router = express.Router();
 
-router.get("/", getSensors);
-router.post("/", insertSensor);
-router.delete("/:sensorId", deleteSensor);
+router.get("/", getLatestSensorData);
+router.get("/workers/:workerId", getWorkerSensorData);
 
 export default router;
