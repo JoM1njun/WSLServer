@@ -24,15 +24,13 @@ app.post("/api/company", async (req, res) => {
     } = req.body;
 
     const sql =
-      'INSERT INTO company (ID, Company_Name, Address, Phone, created_at, updated_at) VALUES (?, ?, ?, ?, ?, ?)';
+      'INSERT INTO company (ID, Company_Name, Address, Phone) VALUES (?, ?, ?, ?)';
 
     await pool.execute(sql, [
       id,
       companyName,
       address,
       phone,
-      createdAt,
-      updatedAt
     ])
     res.json({
       success: true,
@@ -88,8 +86,8 @@ app.post("/api/branches", async (req, res) => {
 
     const sql = `
       INSERT INTO Branch
-      (ID, Branch_name, Address, Phone, Manager_Name, Company_id, created_at)
-      VALUES (?, ?, ?, ?, ?, ?, NOW())
+      (ID, Branch_name, Address, Phone, Manager_Name, Company_id)
+      VALUES (?, ?, ?, ?, ?, ?)
     `;
 
     await pool.execute(sql, [
@@ -152,8 +150,8 @@ app.post("/api/departments", async (req, res) => {
 
     const sql = `
       INSERT INTO Department
-      (ID, Department_Name, Description, Phone, Branch_id, created_at)
-      VALUES (?, ?, ?, ?, ?, NOW())
+      (ID, Department_Name, Description, Phone, Branch_id)
+      VALUES (?, ?, ?, ?, ?)
     `;
 
     await pool.execute(sql, [
@@ -213,8 +211,8 @@ app.post("/api/helmets", async (req, res) => {
 
     const sql = `
       INSERT INTO Helmet
-      (ID, Helmet_Name, Department_id, created_at)
-      VALUES (?, ?, ?, NOW())
+      (ID, Helmet_Name, Department_id)
+      VALUES (?, ?, ?)
     `;
 
     await pool.execute(sql, [
@@ -497,6 +495,118 @@ app.get("/api/workers/:workerId/sensors", async (req, res) => {
     res.status(500).json({
       success: false,
       message: "센서 기록 조회 실패"
+    });
+  }
+});
+
+
+// =======================
+// Test용 Select API
+// =======================
+app.get("/api/company", async (req, res) => {
+  try {
+    const [rows] = await pool.execute(`
+      SELECT *
+      FROM Company
+      ORDER BY ID DESC
+    `);
+
+    res.json({
+      success: true,
+      data: rows
+    });
+  } catch (err) {
+    console.error(err);
+
+    res.status(500).json({
+      success: false,
+      message: "회사 목록 조회 실패"
+    });
+  }
+});
+
+app.get("/api/branches", async (req, res) => {
+  try {
+    const [rows] = await pool.execute(`
+      SELECT
+        b.ID,
+        b.Branch_name,
+        b.Address,
+        b.Phone,
+        b.Manager_Name,
+        c.Company_Name
+      FROM Branch b
+      JOIN Company c
+      ON b.Company_id = c.ID
+      ORDER BY b.ID DESC
+    `);
+
+    res.json({
+      success: true,
+      data: rows
+    });
+  } catch (err) {
+    console.error(err);
+
+    res.status(500).json({
+      success: false,
+      message: "지점 목록 조회 실패"
+    });
+  }
+});
+
+app.get("/api/departments", async (req, res) => {
+  try {
+    const [rows] = await pool.execute(`
+      SELECT
+        d.ID,
+        d.Department_Name,
+        d.Description,
+        d.Phone,
+        b.Branch_name
+      FROM Department d
+      JOIN Branch b
+      ON d.Branch_id = b.ID
+      ORDER BY d.ID DESC
+    `);
+
+    res.json({
+      success: true,
+      data: rows
+    });
+  } catch (err) {
+    console.error(err);
+
+    res.status(500).json({
+      success: false,
+      message: "부서 목록 조회 실패"
+    });
+  }
+});
+
+app.get("/api/helmets", async (req, res) => {
+  try {
+    const [rows] = await pool.execute(`
+      SELECT
+        h.ID,
+        h.Helmet_Name,
+        d.Department_Name
+      FROM Helmet h
+      JOIN Department d
+      ON h.Department_id = d.ID
+      ORDER BY h.ID DESC
+    `);
+
+    res.json({
+      success: true,
+      data: rows
+    });
+  } catch (err) {
+    console.error(err);
+
+    res.status(500).json({
+      success: false,
+      message: "헬멧 목록 조회 실패"
     });
   }
 });
