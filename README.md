@@ -1,7 +1,10 @@
 ## server(Directory) => Web or App Server
-### Language : JavaScript
-### Framework : Express
-### Runtime : Node.js
+### controllers : DB Insert, Delete, Select etc Function (요청 & 응답 처리)
+### routes : URL Connect
+***
+#### Language : JavaScript
+#### Framework : Express
+#### Runtime : Node.js
 
 ***
 
