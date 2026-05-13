@@ -1,10 +1,21 @@
 import joblib
+import pandas as pd
 from fastapi import FastAPI
 from pydantic import BaseModel
 
 app = FastAPI()
 
 model = joblib.load("risk_model.pkl")
+
+feature_columns = [
+    "heartRate",
+    "temperature",
+    "ecgAbnormal",
+    "avgHeartRate",
+    "avgTemperature",
+    "heartDiff",
+    "tempDiff",
+]
 
 
 class SensorData(BaseModel):
@@ -13,62 +24,54 @@ class SensorData(BaseModel):
     heartRate: int
     temperature: float
     ecgAbnormal: bool = False
+    avgHeartRate: int = 75
+    avgTemperature: float = 36.5
     measuredAt: str | None = None
+
+
+STATUS_SAFE = 1
+STATUS_WARNING = 2
+STATUS_DANGER = 3
 
 
 @app.post("/predict")
 def predict(data: SensorData):
-    baseline = get_worker_baseline(data.workerId)
+    heart_diff = data.heartRate - data.avgHeartRate
+    temp_diff = data.temperature - data.avgTemperature
 
-    heart_diff = data.heartRate - baseline.avg_heart_rate
-    temp_diff = data.temperature - baseline.avg_temperature
-
-    features = [[
-        data.heartRate,
-        data.temperature,
-        int(data.ecgAbnormal),
-        baseline.avg_heart_rate,
-        baseline.avg_temperature,
-        heart_diff,
-        temp_diff,
-    ]]
-
-    prediction = model.predict(features)[0]
-    probability = model.predict_proba(features)[0].max()
-
-    save_sensor_log(
-        worker_id=data.workerId,
-        helmet_id=data.helmetId,
-        temperature=data.temperature,
-        heart_rate=data.heartRate,
-        status=prediction
+    features = pd.DataFrame(
+        [
+            {
+                "heartRate": data.heartRate,
+                "temperature": data.temperature,
+                "ecgAbnormal": int(data.ecgAbnormal),
+                "avgHeartRate": data.avgHeartRate,
+                "avgTemperature": data.avgTemperature,
+                "heartDiff": heart_diff,
+                "tempDiff": temp_diff,
+            }
+        ],
+        columns=feature_columns,
     )
 
-    if prediction != "normal":
-        create_alert(data.workerId, data.helmetId, prediction)
+    STATUS_LABELS = {
+        STATUS_SAFE: "safe",
+        STATUS_WARNING: "warning",
+        STATUS_DANGER: "danger",
+    }
+
+    prediction = int(model.predict(features)[0])
+    probability = model.predict_proba(features)[0].max()
 
     return {
         "workerId": data.workerId,
         "helmetId": data.helmetId,
-        "status": prediction,
+        "statusCode": prediction,
+        "status": STATUS_LABELS[prediction],
         "confidence": round(probability * 100, 2),
         "message": (
             "이상 징후가 감지되었습니다. 관리자 확인이 필요합니다."
-            if prediction != "normal"
+            if prediction != STATUS_SAFE
             else "정상 상태입니다."
         ),
     }
-
-def get_worker_baseline(worker_id: int):
-    class Baseline:
-        avg_heart_rate = 75
-        avg_temperature = 36.5
-
-    return Baseline()
-
-def save_sensor_log(worker_id, helmet_id, temperature, heart_rate, status):
-    print("센서기록 저장:", worker_id, helmet_id, temperature, heart_rate, status)
-
-
-def create_alert(worker_id, helmet_id, status):
-    print("알림 생성:", worker_id, helmet_id, status)
