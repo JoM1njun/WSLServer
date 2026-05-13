@@ -10,7 +10,7 @@
 
 ***
 
-## ai(Directory) => AI Model & AI Server
+## ai(Directory) => AI Model & Server, Training Data
 ### Language : Python
 
 ***
