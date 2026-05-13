@@ -1,17 +1,16 @@
 import { pool } from "../db.js";
+import { asyncHandler } from "../utils/asyncHandler.js";
 
 // =======================
 // Worker INSERT / UPDATE / DELETE
 // =======================
 
 // 작업자 추가 INSERT
-export async function insertWorker(req, res) {
-  try {
-    const {
-      id,
-      name,
-      birthDate,
-      gender,
+export const insertWorker = asyncHandler(async (req, res) => {
+  const {
+    name,
+    birthDate,
+    gender,
       position,
       bloodType,
       emergencyContact,
@@ -19,14 +18,19 @@ export async function insertWorker(req, res) {
       departmentId
     } = req.body;
 
+    if (!name || !birthDate || !gender) {
+      const error = new Error("이름, 생년월일, 성별은 필수입니다.");
+      error.statusCode = 400;
+      throw error;
+    }
+
     const sql = `
       INSERT INTO Worker
-      (ID, Name, Birth_date, Gender, Position, Blood_type, Emergency_contact, Disease, Department_id)
-      VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?)
+      (Name, Birth_date, Gender, Position, Blood_type, Emergency_contact, Disease, Department_id)
+      VALUES (?, ?, ?, ?, ?, ?, ?, ?)
     `;
 
     await pool.execute(sql, [
-      id,
       name,
       birthDate,
       gender,
@@ -41,19 +45,11 @@ export async function insertWorker(req, res) {
       success: true,
       message: "작업자 추가 성공"
     });
-  } catch (err) {
-    console.error(err);
-    res.status(500).json({
-      success: false,
-      message: "작업자 추가 실패"
-    });
-  }
-}
+  });
 
 // 작업자 수정 UPDATE
-export async function updateWorker(req, res) {
-  try {
-    const { workerId } = req.params;
+export const updateWorker = asyncHandler(async (req, res) => {
+  const { workerId } = req.params;
 
     const {
       name,
@@ -65,6 +61,12 @@ export async function updateWorker(req, res) {
       disease,
       departmentId
     } = req.body;
+
+    // if (!workerId || isNaN(workerId) || !name || isNaN(name)) {
+    //   const error = new Error("유효하지 않은 작업자 ID 또는 필수 정보가 누락되었습니다.");
+    //   error.statusCode = 400;
+    //   throw error;
+    // }
 
     const sql = `
       UPDATE Worker
@@ -96,19 +98,17 @@ export async function updateWorker(req, res) {
       success: true,
       message: "작업자 수정 성공"
     });
-  } catch (err) {
-    console.error(err);
-    res.status(500).json({
-      success: false,
-      message: "작업자 수정 실패"
-    });
-  }
-}
+  });
 
 // 작업자 삭제 DELETE
-export async function deleteWorker(req, res) {
-  try {
-    const { workerId } = req.params;
+export const deleteWorker = asyncHandler(async (req, res) => {
+  const { workerId } = req.params;
+
+  if (!workerId || isNaN(workerId) || !name || isNaN(name)) {
+    const error = new Error("유효하지 않은 작업자 ID 또는 필수 정보가 누락되었습니다.");
+    error.statusCode = 400;
+    throw error;
+  }
 
     const sql = `
       DELETE FROM Worker
@@ -121,21 +121,13 @@ export async function deleteWorker(req, res) {
       success: true,
       message: "작업자 삭제 성공"
     });
-  } catch (err) {
-    console.error(err);
-    res.status(500).json({
-      success: false,
-      message: "작업자 삭제 실패"
-    });
-  }
-}
+  });
 
-export async function getWorkers(req, res) {
-  try {
-    const sql = `
-      SELECT
-        w.ID AS workerId,
-        w.Name AS workerName,
+export const getWorkers = asyncHandler(async (req, res) => {
+  const sql = `
+    SELECT
+      w.ID AS workerId,
+      w.Name AS workerName,
         TIMESTAMPDIFF(YEAR, w.Birth_date, CURDATE()) AS age,
         w.Gender,
         w.Position,
@@ -158,11 +150,28 @@ export async function getWorkers(req, res) {
       success: true,
       data: rows
     });
-  } catch (err) {
-    console.error(err);
-    res.status(500).json({
-      success: false,
-      message: "작업자 목록 조회 실패"
-    });
+  });
+
+export const getWorkerById = asyncHandler(async (req, res) => {
+  const { workerId } = req.params;
+
+  if (!workerId || isNaN(workerId)) {
+    const error = new Error("유효하지 않은 작업자 ID입니다.");
+    error.statusCode = 400;
+    throw error;
   }
-}
+
+  const [rows] = await pool.execute(
+    "SELECT * FROM worker WHERE ID = ?", [workerId]);
+
+  if (rows.length === 0) {
+    const error = new Error("해당 작업자가 존재하지 않습니다.");
+    error.statusCode = 404;
+    throw error;
+  }
+
+  res.json({
+    success: true,
+    data: rows[0]
+  });
+});

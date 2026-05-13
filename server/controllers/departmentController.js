@@ -1,84 +1,109 @@
-import {pool} from "../db.js";
+import e from "express";
+import { pool } from "../db.js";
+import { asyncHandler } from "../utils/asyncHandler.js";
 
 // =======================
 // Department INSERT / DELETE
 // =======================
-export async function insertDepartment(req, res) {
-  try {
-    const {
-      id,
-      departmentName,
-      description,
-      phone,
-      branchId
-    } = req.body;
+export const insertDepartment = asyncHandler(async (req, res) => {
+  const {
+    departmentName,
+    description,
+    phone,
+    branchId
+  } = req.body;
 
-    const sql = `
+  if (!departmentName) {
+    const error = new Error("부서명은 필수입니다.");
+    error.statusCode = 400;
+    throw error;
+  }
+
+  const sql = `
       INSERT INTO Department
-      (ID, Department_Name, Description, Phone, Branch_id)
-      VALUES (?, ?, ?, ?, ?)
+      (Department_Name, Description, Phone, Branch_id)
+      VALUES (?, ?, ?, ?)
     `;
 
-    await pool.execute(sql, [
-      id,
-      departmentName,
-      description,
-      phone,
-      branchId
-    ]);
+  await pool.execute(sql, [
+    departmentName,
+    description,
+    phone,
+    branchId
+  ]);
 
-    res.json({
-      success: true,
-      message: "부서 추가 성공"
-    });
-  } catch (err) {
-    console.error(err);
-    res.status(500).json({
-      success: false,
-      message: "부서 추가 실패"
-    });
+  res.json({
+    success: true,
+    message: "부서 추가 성공"
+  });
+});
+
+export const deleteDepartment = asyncHandler(async (req, res) => {
+  const { departmentId } = req.params;
+
+  if (!departmentId || isNaN(departmentId)) {
+    const error = new Error("유효하지 않은 부서 ID입니다.");
+    error.statusCode = 400;
+    throw error;
   }
-}
 
-export async function deleteDepartment(req, res) {
-  try {
-    const { departmentId } = req.params;
+  const [rows] = await pool.execute(
+    "SELECT * FROM Department WHERE ID = ?",
+    [departmentId]
+  );
 
-    await pool.execute(
-      "DELETE FROM Department WHERE ID = ?",
-      [departmentId]
-    );
-
-    res.json({
-      success: true,
-      message: "부서 삭제 성공"
-    });
-  } catch (err) {
-    console.error(err);
-    res.status(500).json({
-      success: false,
-      message: "부서 삭제 실패"
-    });
+  if (rows.length === 0) {
+    const error = new Error("삭제할 부서가 존재하지 않습니다.");
+    error.statusCode = 404;
+    throw error;
   }
-}
 
-export async function getDepartments(req, res) {
-  try {
-    const [rows] = await pool.execute(`
-      SELECT *
-      FROM department
-      ORDER BY ID DESC
+  await pool.execute(
+    "DELETE FROM Department WHERE ID = ?",
+    [departmentId]
+  );
+
+  res.json({
+    success: true,
+    message: "부서 삭제 성공"
+  });
+});
+
+export const getDepartments = asyncHandler(async (req, res) => {
+  const [rows] = await pool.execute(`
+    SELECT *
+    FROM department
+    ORDER BY ID DESC
     `);
 
-    res.json({
-      success: true,
-      data: rows
-    });
-  } catch (err) {
-    console.error(err);
-    res.status(500).json({
-      success: false,
-      message: "부서 목록 조회 실패"
-    });
+  res.json({
+    success: true,
+    data: rows
+  });
+});
+
+export const getDepartmentById = asyncHandler(async (req, res) => {
+  const { departmentId } = req.params;
+
+  if (!departmentId || isNaN(departmentId)) {
+    const error = new Error("유효하지 않은 부서 ID입니다.");
+    error.statusCode = 400;
+    throw error;
   }
-}
+
+  const [rows] = await pool.execute(
+    "SELECT * FROM Department WHERE ID = ?",
+    [departmentId]
+  );
+
+  if (rows.length === 0) {
+    const error = new Error("부서가 존재하지 않습니다.");
+    error.statusCode = 404;
+    throw error;
+  }
+
+  res.json({
+    success: true,
+    data: rows[0]
+  });
+});
