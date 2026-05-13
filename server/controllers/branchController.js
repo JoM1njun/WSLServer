@@ -1,86 +1,110 @@
 import { pool } from "../db.js";
+import { asyncHandler } from "../utils/asyncHandler.js";
 
 // =======================
 // Branch INSERT / DELETE
 // =======================
-export async function insertBranch (req, res) {
-  try {
-    const {
-      id,
-      branchName,
-      address,
-      phone,
-      managerName,
-      companyId
-    } = req.body;
+export const insertBranch = asyncHandler(async (req, res) => {
+  const {
+    branchName,
+    address,
+    phone,
+    managerName,
+    companyId
+  } = req.body;
 
-    const sql = `
+  if (!branchName) {
+    const error = new Error("지점명은 필수입니다.");
+    error.statusCode = 400;
+    throw error;
+  }
+
+  const sql = `
       INSERT INTO Branch
-      (ID, Branch_name, Address, Phone, Manager_Name, Company_id)
-      VALUES (?, ?, ?, ?, ?, ?)
+      (Branch_name, Address, Phone, Manager_Name, Company_id)
+      VALUES (?, ?, ?, ?, ?)
     `;
 
-    await pool.execute(sql, [
-      id,
-      branchName,
-      address,
-      phone,
-      managerName,
-      companyId
-    ]);
+  await pool.execute(sql, [
+    branchName,
+    address,
+    phone,
+    managerName,
+    companyId
+  ]);
 
-    res.json({
-      success: true,
-      message: "지점 추가 성공"
-    });
-  } catch (err) {
-    console.error(err);
-    res.status(500).json({
-      success: false,
-      message: "지점 추가 실패"
-    });
+  res.json({
+    success: true,
+    message: "지점 추가 성공"
+  });
+});
+
+export const deleteBranch = asyncHandler(async (req, res) => {
+  const { branchId } = req.params;
+
+  if (!branchId || isNaN(branchIdId)) {
+    const error = new Error("유효하지 않은 지점 ID입니다.");
+    error.statusCode = 400;
+    throw error;
   }
-}
 
-export async function deleteBranch (req, res) {
-  try {
-    const { branchId } = req.params;
+  const [rows] = await pool.execute(
+    "SELECT * FROM branch WHERE ID = ?",
+    [branchId]
+  );
 
-    await pool.execute(
-      "DELETE FROM Branch WHERE ID = ?",
-      [branchId]
-    );
-
-    res.json({
-      success: true,
-      message: "지점 삭제 성공"
-    });
-  } catch (err) {
-    console.error(err);
-    res.status(500).json({
-      success: false,
-      message: "지점 삭제 실패"
-    });
+  if (rows.length === 0) {
+    const error = new Error("삭제할 지점이 존재하지 않습니다.");
+    error.statusCode = 404;
+    throw error;
   }
-}
 
-export async function getBranches(req, res) {
-  try {
-    const [rows] = await pool.execute(`
-      SELECT *
-      FROM branch
-      ORDER BY ID DESC
+  await pool.execute(
+    "DELETE FROM Branch WHERE ID = ?",
+    [branchId]
+  );
+
+  res.json({
+    success: true,
+    message: "지점 삭제 성공"
+  });
+});
+
+export const getBranches = asyncHandler(async (req, res) => {
+  const [rows] = await pool.execute(`
+    SELECT * 
+    FROM branch 
+    ORDER BY ID DESC
     `);
 
-    res.json({
-      success: true,
-      data: rows
-    });
-  } catch (err) {
-    console.error(err);
-    res.status(500).json({
-      success: false,
-      message: "지점 목록 조회 실패"
-    });
+  res.json({
+    success: true,
+    data: rows
+  });
+});
+
+export const getBranchById = asyncHandler(async (req, res) => {
+  const { branchId } = req.params;
+
+  if (!branchId || isNaN(branchIdId)) {
+    const error = new Error("유효하지 않은 지점 ID입니다.");
+    error.statusCode = 400;
+    throw error;
   }
-}
+
+  const [rows] = await pool.execute(
+    "SELECT * FROM branch WHERE ID = ?",
+    [branchId]
+  );
+
+  if (rows.length === 0) {
+    const error = new Error("지점이 존재하지 않습니다.");
+    error.statusCode = 404;
+    throw error;
+  }
+
+  res.json({
+    success: true,
+    data: rows[0]
+  });
+});
