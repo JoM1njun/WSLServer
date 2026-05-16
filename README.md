@@ -6,9 +6,17 @@
 <br><br>
 
 ## 사용법
-### SERVER URL/API Name/추가 API <= 필요시
-### API Name => 
-### 회사 : company, 지점 : branches, 부서 : departments, 작업자 : workers, 헬멧 : helmets, 센서 : sensors
+### API Prefix
+| API        | URL Prefix     | 설명                |
+| ---------- | -------------- | ----------------- |
+| Company    | `/company`     | 회사 정보 관리          |
+| Branch     | `/branches`    | 지점 정보 관리          |
+| Department | `/departments` | 부서 정보 관리          |
+| Worker     | `/workers`     | 작업자 정보 관리         |
+| Helmet     | `/helmets`     | 헬멧 정보 관리          |
+| Sensor     | `/sensors`     | 센서 데이터 및 AI 예측 관리 |
+### https://서버URL/workers OR https://서버URL/workers/workersId
+
 
 ## Company API
 ### API List
