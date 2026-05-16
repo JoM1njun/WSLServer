@@ -3,9 +3,7 @@
 ### routes = URL Connect (각 DB Controller Server.js와 연결)
 ### middlewear = Exception & Error Handling (예외처리 및 오류처리)
 ### utils = Public Function (공통 기능 함수)
-
-***
-
+<br>
 ## 사용법
 ### SERVER URL/API Name/추가 API <= 필요시
 ### API Name => 
@@ -307,18 +305,30 @@ POST /workers
 ### 4. 작업자 수정
 PATCH /workers/:workerId
 ### Example
-#### single
+
+#### Request Body
+| 필드 | 타입 | 필수 | 설명 |
+| --- | --- | --- | --- |
+| name | String | X | 작업자 이름 |
+| birthDate | Date | X | 생년월일 |
+| gender | String | X | 성별 |
+| position | String | X | 직책 |
+| bloodType | String | X | 혈액형 |
+| emergencyContact | String | X | 비상 연락처 |
+| disease | String | X | 질병 정보 |
+| departmentId | Number | X | 소속 부서 ID |
+
+### Single Field
 {
   "position": "관리자"
 }
-#### multiple
+
+### Multi Field
 {
   "position": "팀장",
   "bloodType": "AB",
   "disease": "없음"
 }
-
-#### Request Body
 
 #### Response
 {
@@ -472,10 +482,8 @@ DELETE /helmets/:helmetId
 {
   "success": true,
   "message": "헬멧 삭제 성공"
-} <br>
+} <br><br>
 
- 
-***
 #### Language : JavaScript
 #### Framework : Express
 #### Runtime : Node.js
