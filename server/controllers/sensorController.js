@@ -21,7 +21,7 @@ export const insertSensorData = asyncHandler(async (req, res) => {
   const [currentRows] = await pool.execute(
     `
   SELECT status
-  FROM Current_Sensor_Data
+  FROM current_sensor_status
   WHERE worker_id = ? AND helmet_id = ?
   `,
     [workerId, helmetId]
