@@ -131,8 +131,8 @@ export const updateWorker = asyncHandler(async (req, res) => {
 export const deleteWorker = asyncHandler(async (req, res) => {
   const { workerId } = req.params;
 
-  if (!workerId || isNaN(workerId) || !name || isNaN(name)) {
-    const error = new Error("유효하지 않은 작업자 ID 또는 필수 정보가 누락되었습니다.");
+  if (!workerId || isNaN(workerId)) {
+    const error = new Error("유효하지 않은 작업자 ID입니다.");
     error.statusCode = 400;
     throw error;
   }
