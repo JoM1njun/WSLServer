@@ -10,7 +10,7 @@
 ### API Name => 
 ### 회사 : company, 지점 : branches, 부서 : departments, 작업자 : workers, 헬멧 : helmets, 센서 : sensors
 
-## Company API<br>
+## Company API
 ### API List
 | Method | URL                   | 설명          |
 | ------ | --------------------- | ----------- |
@@ -33,7 +33,7 @@ GET /company
       "Phone": "010-1234-5678"
     }
   ]
-}<br>
+} <br><br>
 ### 2. 특정 회사 조회
 GET /company/:companyId
 #### ex: GET /company/1
@@ -47,7 +47,7 @@ GET /company/:companyId
     "Address": "대전광역시 ...",
     "Phone": "010-1234-5678"
   }
-}<br>
+} <br><br>
 ### 3. 회사 추가
 POST /company
 
@@ -61,7 +61,7 @@ POST /company
 {
   "success": true,
   "message": "회사 정보 추가 성공"
-}<br>
+} <br><br>
 ### 4. 회사 삭제
 DELETE /company/:companyId
 ### ex: DELETE /company/1
@@ -70,9 +70,9 @@ DELETE /company/:companyId
 {
   "success": true,
   "message": "회사 삭제 성공"
-} <br><br>
+} <br><br><br>
 
-## Branch API<br>
+## Branch API
 ### API List
 | Method | URL                   | 설명          |
 | ------ | --------------------- | ----------- |
@@ -97,7 +97,7 @@ GET /branches
       "Company_id": 1
     }
   ]
-} <br>
+} <br><br>
 
 ### 2. 특정 지점 조회
 GET /branches/:branchId
@@ -114,7 +114,7 @@ GET /branches/:branchId
     "Manager_Name": "홍길동",
     "Company_id": 1
   }
-} <br>
+} <br><br>
 
 ### 3. 지점 추가
 POST /branches
@@ -132,7 +132,7 @@ POST /branches
 {
   "success": true,
   "message": "지점 추가 성공"
-} <br>
+} <br><br>
 
 ### 4. 지점 삭제
 DELETE /branches/:branchId
@@ -142,10 +142,10 @@ DELETE /branches/:branchId
 {
   "success": true,
   "message": "지점 삭제 성공"
-} <br><br>
+} <br><br><br>
 
 
-## Departemt API<br>
+## Departemt API
 ### API List
 | Method | URL                          | 설명          |
 | ------ | ---------------------------- | ----------- |
@@ -169,7 +169,7 @@ GET /departments
       "Branch_id": 1
     }
   ]
-} <br>
+} <br><br>
 
 ### 2. 특정 부서 조회
 GET /departments/:departmentId
@@ -185,7 +185,7 @@ GET /departments/:departmentId
     "Phone": "010-2222-3333",
     "Branch_id": 1
   }
-} <br>
+} <br><br>
 
 ### 3. 부서 추가
 POST /departments
@@ -202,7 +202,7 @@ POST /departments
 {
   "success": true,
   "message": "부서 추가 성공"
-} <br>
+} <br><br>
 
 ### 4. 부서 삭제
 DELETE /departments/:departmentId
@@ -212,7 +212,7 @@ DELETE /departments/:departmentId
 {
   "success": true,
   "message": "부서 삭제 성공"
-} <br><br>
+} <br><br><br>
 
 ## Worker API
 ### API List
@@ -245,7 +245,7 @@ GET /workers
       "companyName": "ABC 회사"
     }
   ]
-}
+} <br><br>
 
 ### 2. 특정 작업자 조회
 GET /workers/:workerId
@@ -269,7 +269,7 @@ GET /workers/:workerId
       "companyName": "ABC 회사"
     }
   ]
-} <br>
+} <<br><br>
 
 ### 3. 작업자 추가
 POST /workers
@@ -301,7 +301,7 @@ POST /workers
 {
   "success": true,
   "message": "작업자 추가 성공"
-} <br>
+} <br><br>
 
 ### 4. 작업자 수정
 PATCH /workers/:workerId
@@ -335,19 +335,17 @@ PATCH /workers/:workerId
 {
   "success": true,
   "message": "작업자 수정 성공"
-} <br>
+} <br><br>
 
 ### 5. 작업자 삭제
 DELETE /workers/:workerId
 ### ex: DELETE /workers/1
 
-<br><br>
-
 #### Response
 {
   "success": true,
   "message": "작업자 삭제 성공"
-} <br><br>
+} <br><br><br>
 
 ## Sensor API
 ### API List
@@ -386,7 +384,7 @@ POST /sensors
     "confidence": 0.95,
     "message": "정상 상태입니다."
   }
-} <br>
+} <br><br>
 
 ### 2. 최근 센서 데이터 조회
 GET /sensors/:workerId/:helmetId
@@ -407,7 +405,7 @@ GET /sensors/:workerId/:helmetId
       "updated_at": "2026-05-16T12:00:00.000Z"
     }
   ]
-}
+} <br><br>
 
 ### 3. 특정 작업자 센서 기록 조회
 GET /sensors/workers/:workerId
@@ -426,7 +424,7 @@ GET /sensors/workers/:workerId
       "Measured_at": "2026-05-16T12:00:00.000Z"
     }
   ]
-} <br><br>
+} <br><br><br>
 
 ## Helmet API
 ### API List
@@ -450,7 +448,7 @@ GET /helmets
       "Department_id": 1
     }
   ]
-} <br>
+} <br><br>
 
 ### 2. 특정 헬멧 조회
 GET /helmets/:helmetId
@@ -474,7 +472,7 @@ POST /helmets
 {
   "success": true,
   "message": "헬멧 추가 성공"
-} <br>
+} <br><br>
 
 ### 4. 헬멧 삭제
 DELETE /helmets/:helmetId
@@ -483,7 +481,7 @@ DELETE /helmets/:helmetId
 {
   "success": true,
   "message": "헬멧 삭제 성공"
-} <br><br>
+} <br><br><br>
 
 #### Language : JavaScript
 #### Framework : Express
