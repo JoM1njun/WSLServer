@@ -28,10 +28,10 @@ app.get("/", (req, res) => {
 });
 
 app.listen(PORT, "0.0.0.0", () => {
-  const deployedAt = new Date();
+  const now = new Date();
 
   console.log(`Server running on port ${PORT}`);
-  console.log(`Deployed/started at: ${deployedAt.toLocaleString("ko-KR", {
+  console.log(`Deploy started at KST: ${now.toLocaleString("ko-KR", {
     timeZone: "Asia/Seoul"
   })}`);
   console.log(`Deploy started at UTC: ${now.toISOString()}`);
