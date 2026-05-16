@@ -5,7 +5,7 @@
 ### utils = Public Function (공통 기능 함수)
 <br><br>
 
-## 사용법
+## How To Use
 ### API Prefix
 | API        | URL Prefix     | 설명                |
 | ---------- | -------------- | ----------------- |
@@ -15,8 +15,10 @@
 | Worker     | `/workers`     | 작업자 정보 관리         |
 | Helmet     | `/helmets`     | 헬멧 정보 관리          |
 | Sensor     | `/sensors`     | 센서 데이터 및 AI 예측 관리 |
-### https://서버URL/workers OR https://서버URL/workers/workersId
+<br>
 
+### ex: https://서버URL/workers OR https://서버URL/workers/workerId
+<br>
 
 ## Company API
 ### API List
