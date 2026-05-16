@@ -11,94 +11,121 @@ export const insertWorker = asyncHandler(async (req, res) => {
     name,
     birthDate,
     gender,
-      position,
-      bloodType,
-      emergencyContact,
-      disease,
-      departmentId
-    } = req.body;
+    position,
+    bloodType,
+    emergencyContact,
+    disease,
+    departmentId
+  } = req.body;
 
-    if (!name || !birthDate || !gender) {
-      const error = new Error("이름, 생년월일, 성별은 필수입니다.");
-      error.statusCode = 400;
-      throw error;
-    }
+  if (!name || !birthDate || !gender) {
+    const error = new Error("이름, 생년월일, 성별은 필수입니다.");
+    error.statusCode = 400;
+    throw error;
+  }
 
-    const sql = `
+  const sql = `
       INSERT INTO Worker
       (Name, Birth_date, Gender, Position, Blood_type, Emergency_contact, Disease, Department_id)
       VALUES (?, ?, ?, ?, ?, ?, ?, ?)
     `;
 
-    await pool.execute(sql, [
-      name,
-      birthDate,
-      gender,
-      position,
-      bloodType,
-      emergencyContact,
-      disease,
-      departmentId
-    ]);
+  await pool.execute(sql, [
+    name,
+    birthDate,
+    gender,
+    position,
+    bloodType,
+    emergencyContact,
+    disease,
+    departmentId
+  ]);
 
-    res.json({
-      success: true,
-      message: "작업자 추가 성공"
-    });
+  res.json({
+    success: true,
+    message: "작업자 추가 성공"
   });
+});
 
 // 작업자 수정 UPDATE
 export const updateWorker = asyncHandler(async (req, res) => {
   const { workerId } = req.params;
 
-    const {
-      name,
-      birthDate,
-      gender,
-      position,
-      bloodType,
-      emergencyContact,
-      disease,
-      departmentId
-    } = req.body;
+  const {
+    name,
+    birthDate,
+    gender,
+    position,
+    bloodType,
+    emergencyContact,
+    disease,
+    departmentId
+  } = req.body;
 
-    // if (!workerId || isNaN(workerId) || !name || isNaN(name)) {
-    //   const error = new Error("유효하지 않은 작업자 ID 또는 필수 정보가 누락되었습니다.");
-    //   error.statusCode = 400;
-    //   throw error;
-    // }
+  const fields = [];
+  const values = [];
 
-    const sql = `
-      UPDATE Worker
-      SET
-        Name = ?,
-        Birth_date = ?,
-        Gender = ?,
-        Position = ?,
-        Blood_type = ?,
-        Emergency_contact = ?,
-        Disease = ?,
-        Department_id = ?
-      WHERE ID = ?
-    `;
+  if (name !== undefined) {
+    fields.push("Name = ?");
+    values.push(name);
+  }
 
-    await pool.execute(sql, [
-      name,
-      birthDate,
-      gender,
-      position,
-      bloodType,
-      emergencyContact,
-      disease,
-      departmentId,
-      workerId
-    ]);
+  if (birthDate !== undefined) {
+    fields.push("Birth_date = ?");
+    values.push(birthDate);
+  }
 
-    res.json({
-      success: true,
-      message: "작업자 수정 성공"
-    });
+  if (gender !== undefined) {
+    fields.push("Gender = ?");
+    values.push(gender);
+  }
+
+  if (position !== undefined) {
+    fields.push("Position = ?");
+    values.push(position);
+  }
+
+  if (bloodType !== undefined) {
+    fields.push("Blood_type = ?");
+    values.push(bloodType);
+  }
+
+  if (emergencyContact !== undefined) {
+    fields.push("Emergency_contact = ?");
+    values.push(emergencyContact);
+  }
+
+  if (disease !== undefined) {
+    fields.push("Disease = ?");
+    values.push(disease);
+  }
+
+  if (departmentId !== undefined) {
+    fields.push("Department_id = ?");
+    values.push(departmentId);
+  }
+
+  if (fields.length === 0) {
+    const error = new Error("수정할 데이터가 없습니다.");
+    error.statusCode = 400;
+    throw error;
+  }
+
+  values.push(workerId);
+
+  const sql = `
+    UPDATE Worker
+    SET ${fields.join(", ")}
+    WHERE ID = ?
+  `;
+
+  await pool.execute(sql, values);
+
+  res.json({
+    success: true,
+    message: "작업자 수정 성공"
   });
+});
 
 // 작업자 삭제 DELETE
 export const deleteWorker = asyncHandler(async (req, res) => {
@@ -110,18 +137,18 @@ export const deleteWorker = asyncHandler(async (req, res) => {
     throw error;
   }
 
-    const sql = `
+  const sql = `
       DELETE FROM Worker
       WHERE ID = ?
     `;
 
-    await pool.execute(sql, [workerId]);
+  await pool.execute(sql, [workerId]);
 
-    res.json({
-      success: true,
-      message: "작업자 삭제 성공"
-    });
+  res.json({
+    success: true,
+    message: "작업자 삭제 성공"
   });
+});
 
 export const getWorkers = asyncHandler(async (req, res) => {
   const sql = `
@@ -144,13 +171,13 @@ export const getWorkers = asyncHandler(async (req, res) => {
       ORDER BY w.ID DESC
     `;
 
-    const [rows] = await pool.execute(sql);
+  const [rows] = await pool.execute(sql);
 
-    res.json({
-      success: true,
-      data: rows
-    });
+  res.json({
+    success: true,
+    data: rows
   });
+});
 
 export const getWorkerById = asyncHandler(async (req, res) => {
   const { workerId } = req.params;
