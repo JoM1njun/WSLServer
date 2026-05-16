@@ -42,7 +42,7 @@ export const insertBranch = asyncHandler(async (req, res) => {
 export const deleteBranch = asyncHandler(async (req, res) => {
   const { branchId } = req.params;
 
-  if (!branchId || isNaN(branchIdId)) {
+  if (!branchId || isNaN(branchId)) {
     const error = new Error("유효하지 않은 지점 ID입니다.");
     error.statusCode = 400;
     throw error;
