@@ -188,8 +188,27 @@ export const getWorkerById = asyncHandler(async (req, res) => {
     throw error;
   }
 
-  const [rows] = await pool.execute(
-    "SELECT * FROM worker WHERE ID = ?", [workerId]);
+  const sql = `
+    SELECT
+      w.ID AS workerId,
+      w.Name AS workerName,
+      TIMESTAMPDIFF(YEAR, w.Birth_date, CURDATE()) AS age,
+      w.Gender,
+      w.Position,
+      w.Blood_type,
+      w.Emergency_contact,
+      w.Disease,
+      d.Department_Name AS departmentName,
+      b.Branch_name AS branchName,
+      c.Company_Name AS companyName
+    FROM Worker w
+    JOIN Department d ON w.Department_id = d.ID
+    JOIN Branch b ON d.Branch_id = b.ID
+    JOIN Company c ON b.Company_id = c.ID
+    WHERE w.ID = ?
+  `;
+
+  const [rows] = await pool.execute(sql, [workerId]);
 
   if (rows.length === 0) {
     const error = new Error("해당 작업자가 존재하지 않습니다.");
