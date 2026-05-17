@@ -1,6 +1,8 @@
 // Simple Logger Utility
 const getTime = () => {
-    return new Date().toLocaleString("ko-KR");
+    return new Date().toLocaleString("ko-KR", {
+        timeZone: "Asia/Seoul"
+    });
 };
 
 export const logger = {
