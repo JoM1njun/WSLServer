@@ -7,6 +7,10 @@ import { asyncHandler } from "../utils/asyncHandler.js";
 
 // 작업자 추가 INSERT
 export const insertWorker = asyncHandler(async (req, res) => {
+  console.log("\n==============================");
+  console.log("[Worker INSERT API] 작업자 추가 요청");
+  console.log("==============================");
+
   const {
     name,
     birthDate,
@@ -18,11 +22,30 @@ export const insertWorker = asyncHandler(async (req, res) => {
     departmentId
   } = req.body;
 
+  console.log("[Request Body]", {
+    name,
+    birthDate,
+    gender,
+    position,
+    bloodType,
+    emergencyContact,
+    disease,
+    departmentId
+  });
+
   if (!name || !birthDate || !gender) {
+    console.warn("[Validation Error] 필수값 누락", {
+      name,
+      birthDate,
+      gender
+    });
+
     const error = new Error("이름, 생년월일, 성별은 필수입니다.");
     error.statusCode = 400;
     throw error;
   }
+
+  console.log("[Validation] 작업자 필수 데이터 검증 완료");
 
   const sql = `
       INSERT INTO Worker
@@ -41,6 +64,10 @@ export const insertWorker = asyncHandler(async (req, res) => {
     departmentId
   ]);
 
+  console.log("[DB] 작업자 데이터 INSERT 완료");
+
+  console.log("✅ [Worker INSERT API] 작업자 추가 완료");
+
   res.json({
     success: true,
     message: "작업자 추가 성공"
@@ -49,7 +76,15 @@ export const insertWorker = asyncHandler(async (req, res) => {
 
 // 작업자 수정 UPDATE
 export const updateWorker = asyncHandler(async (req, res) => {
+  console.log("\n==============================");
+  console.log("[Worker UPDATE API] 작업자 수정 요청");
+  console.log("==============================");
+
   const { workerId } = req.params;
+
+  console.log("[Request Params]", {
+    workerId
+  });
 
   const {
     name,
@@ -61,6 +96,17 @@ export const updateWorker = asyncHandler(async (req, res) => {
     disease,
     departmentId
   } = req.body;
+
+  console.log("[Request Body]", {
+    name,
+    birthDate,
+    gender,
+    position,
+    bloodType,
+    emergencyContact,
+    disease,
+    departmentId
+  });
 
   const fields = [];
   const values = [];
@@ -106,10 +152,16 @@ export const updateWorker = asyncHandler(async (req, res) => {
   }
 
   if (fields.length === 0) {
+    console.warn("[Validation Error] 수정할 데이터 없음", {
+      workerId
+    });
+
     const error = new Error("수정할 데이터가 없습니다.");
     error.statusCode = 400;
     throw error;
   }
+
+  console.log("[UPDATE Fields]", fields);
 
   values.push(workerId);
 
@@ -121,6 +173,12 @@ export const updateWorker = asyncHandler(async (req, res) => {
 
   await pool.execute(sql, values);
 
+  console.log("[DB] 작업자 데이터 UPDATE 완료", {
+    workerId
+  });
+
+  console.log("✅ [Worker UPDATE API] 작업자 수정 완료");
+
   res.json({
     success: true,
     message: "작업자 수정 성공"
@@ -129,9 +187,21 @@ export const updateWorker = asyncHandler(async (req, res) => {
 
 // 작업자 삭제 DELETE
 export const deleteWorker = asyncHandler(async (req, res) => {
+  console.log("\n==============================");
+  console.log("[Worker DELETE API] 작업자 삭제 요청");
+  console.log("==============================");
+
   const { workerId } = req.params;
 
+  console.log("[Request Params]", {
+    workerId
+  });
+
   if (!workerId || isNaN(workerId)) {
+    console.warn("[Validation Error] 유효하지 않은 작업자 ID", {
+      workerId
+    });
+
     const error = new Error("유효하지 않은 작업자 ID입니다.");
     error.statusCode = 400;
     throw error;
@@ -144,13 +214,24 @@ export const deleteWorker = asyncHandler(async (req, res) => {
 
   await pool.execute(sql, [workerId]);
 
+  console.warn("[DB] 작업자 데이터 DELETE 완료", {
+    workerId
+  });
+
+  console.log("✅ [Worker DELETE API] 작업자 삭제 완료");
+
   res.json({
     success: true,
     message: "작업자 삭제 성공"
   });
 });
 
+// 전체 작업자 조회 API
 export const getWorkers = asyncHandler(async (req, res) => {
+  console.log("\n==============================");
+  console.log("[Worker GET API] 전체 작업자 조회 요청");
+  console.log("==============================");
+
   const sql = `
     SELECT
       w.ID AS workerId,
@@ -173,16 +254,36 @@ export const getWorkers = asyncHandler(async (req, res) => {
 
   const [rows] = await pool.execute(sql);
 
+  console.log("[DB] 전체 작업자 조회 완료", {
+    count: rows.length
+  });
+
+  console.log("✅ [Worker GET API] 응답 완료");
+
   res.json({
     success: true,
     data: rows
   });
 });
 
+// 특정 작업자 조회 API
 export const getWorkerById = asyncHandler(async (req, res) => {
+  console.log("\n==============================");
+  console.log("[Worker DETAIL API] 특정 작업자 조회 요청");
+  console.log("==============================");
+
+
   const { workerId } = req.params;
 
+  console.log("[Request Params]", {
+    workerId
+  });
+
   if (!workerId || isNaN(workerId)) {
+    console.warn("[Validation Error] 유효하지 않은 작업자 ID", {
+      workerId
+    });
+
     const error = new Error("유효하지 않은 작업자 ID입니다.");
     error.statusCode = 400;
     throw error;
@@ -210,11 +311,21 @@ export const getWorkerById = asyncHandler(async (req, res) => {
 
   const [rows] = await pool.execute(sql, [workerId]);
 
+  console.log("[DB] 특정 작업자 조회 완료", {
+    resultCount: rows.length
+  });
+
   if (rows.length === 0) {
+    console.warn("[Not Found] 해당 작업자 없음", {
+      workerId
+    });
+
     const error = new Error("해당 작업자가 존재하지 않습니다.");
     error.statusCode = 404;
     throw error;
   }
+
+  console.log("✅ [Worker DETAIL API] 응답 완료");
 
   res.json({
     success: true,
