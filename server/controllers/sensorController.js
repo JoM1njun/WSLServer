@@ -1,13 +1,10 @@
 import { pool } from "../db.js";
 import { asyncHandler } from "../utils/asyncHandler.js";
+import { logger } from "../utils/logger.js";
 
 // Sensor Data Insert API (Post)
 // AI 서버와 연동하여 센서 데이터 저장 및 위험 상태 알림 생성
 export const insertSensorData = asyncHandler(async (req, res) => {
-  console.log("\n==============================");
-  console.log("[Sensor API] 센서 데이터 저장 요청 시작");
-  console.log("==============================");
-
   const {
     workerId,
     helmetId,
@@ -16,16 +13,8 @@ export const insertSensorData = asyncHandler(async (req, res) => {
     ecgValue,
   } = req.body;
 
-  console.log("[Request Body]", {
-    workerId,
-    helmetId,
-    temperature,
-    heartRate,
-    ecgValue,
-  });
-
   if (!workerId || isNaN(workerId) || !helmetId || isNaN(helmetId)) {
-    console.warn("[Validation Error] 유효하지 않은 작업자 ID 또는 헬멧 ID", {
+    logger.warn("[Validation Error] 유효하지 않은 작업자 ID 또는 헬멧 ID", {
       workerId,
       helmetId,
     });
@@ -34,8 +23,6 @@ export const insertSensorData = asyncHandler(async (req, res) => {
     error.statusCode = 400;
     throw error;
   }
-
-  console.log("[Validation] 작업자 ID 및 헬멧 ID 검증 완료");
 
   const [currentRows] = await pool.execute(
     `
@@ -48,7 +35,7 @@ export const insertSensorData = asyncHandler(async (req, res) => {
 
   const previousStatus = currentRows[0]?.status;
 
-  console.log("[DB] 이전 센서 상태 조회 완료", {
+  logger.info("[DB] 이전 센서 상태 조회 완료", {
     previousStatus: previousStatus ?? "기존 상태 없음",
   });
 
@@ -61,8 +48,6 @@ export const insertSensorData = asyncHandler(async (req, res) => {
 
   // AI 서버 연결
   // 추후 AI 모델 서버 URL로 변경 필요
-  console.log("[AI] AI 서버 예측 요청 시작");
-
   const aiResponse = await fetch("http://localhost:8000/predict", {
     method: "POST",
     headers: {
@@ -86,7 +71,7 @@ export const insertSensorData = asyncHandler(async (req, res) => {
   });
 
   if (!aiResponse.ok) {
-    console.error("[AI Error] AI 서버 예측 요청 실패", {
+    logger.error("[AI Error] AI 서버 예측 요청 실패", {
       statusCode: aiResponse.status,
     });
 
@@ -97,7 +82,7 @@ export const insertSensorData = asyncHandler(async (req, res) => {
 
   const aiResult = await aiResponse.json();
 
-  console.log("[AI Result]", aiResult);
+  logger.info("[AI Result]", aiResult);
 
   // Sensor Log 저장
   await pool.execute(
@@ -123,8 +108,6 @@ export const insertSensorData = asyncHandler(async (req, res) => {
       aiResult.status
     ]
   );
-
-  console.log("[DB] Sensor 로그 저장 완료");
 
   // 센서 데이터 업데이트 (최신화)
   await pool.execute(
@@ -152,8 +135,6 @@ export const insertSensorData = asyncHandler(async (req, res) => {
     ]
   );
 
-  console.log("[DB] Current_Sensor_Data 최신 상태 업데이트 완료");
-
   // 4. 위험 상태면 Alert 생성
   if (aiResult.status >= 3 && previousStatus !== aiResult.status) {
     await pool.execute(
@@ -174,15 +155,15 @@ export const insertSensorData = asyncHandler(async (req, res) => {
         aiResult.message
       ]
     );
-    console.warn("[Alert] Alert 생성 완료");
+    logger.warn("[Alert] Alert 생성 완료");
   } else {
-    console.log("[Alert] Alert 생성 조건 아님", {
+    logger.info("[Alert] Alert 생성 조건 아님", {
       status: aiResult.status,
       previousStatus,
     });
   }
 
-  console.log("[Sensor API] 센서 데이터 저장 처리 완료");
+  logger.info("[Sensor API] 센서 데이터 저장 처리 완료");
 
   res.json({
     success: true,
@@ -193,19 +174,10 @@ export const insertSensorData = asyncHandler(async (req, res) => {
 
 // 최신 센서 데이터 조회 API
 export const getLatestSensorData = asyncHandler(async (req, res) => {
-  console.log("\n==============================");
-  console.log("[Latest Sensor API] 최신 센서 데이터 조회 요청");
-  console.log("==============================");
-
   const { workerId, helmetId } = req.params;
 
-  console.log("[Request Params]", {
-    workerId,
-    helmetId,
-  });
-
   if (!workerId || isNaN(workerId) || !helmetId || isNaN(helmetId)) {
-    console.warn("[Validation Error] 유효하지 않은 작업자 ID 또는 헬멧 ID", {
+    logger.warn("[Validation Error] 유효하지 않은 작업자 ID 또는 헬멧 ID", {
       workerId,
       helmetId,
     });
@@ -222,11 +194,9 @@ export const getLatestSensorData = asyncHandler(async (req, res) => {
       ORDER BY updated_at DESC
     `, [workerId, helmetId]);
 
-  console.log("[DB] 최신 센서 데이터 조회 완료", {
+  logger.info("[DB] 최신 센서 데이터 조회 완료", {
     count: rows.length,
   });
-
-  console.log("[Latest Sensor API] 응답 완료");
 
   res.json({
     success: true,
@@ -236,18 +206,10 @@ export const getLatestSensorData = asyncHandler(async (req, res) => {
 
 // 특정 작업자의 센서 기록 조회 API
 export const getWorkerSensorData = asyncHandler(async (req, res) => {
-  console.log("\n==============================");
-  console.log("[Worker Sensor API] 작업자 센서 기록 조회 요청");
-  console.log("==============================");
-
   const { workerId } = req.params;
 
-  console.log("[Request Params]", {
-    workerId,
-  });
-
   if (!workerId || isNaN(workerId)) {
-    console.warn("[Validation Error] 유효하지 않은 작업자 ID", {
+    logger.warn("[Validation Error] 유효하지 않은 작업자 ID", {
       workerId,
     });
 
@@ -272,12 +234,10 @@ export const getWorkerSensorData = asyncHandler(async (req, res) => {
 
   const [rows] = await pool.execute(sql, [workerId]);
 
-  console.log("[DB] 작업자 센서 기록 조회 완료", {
+  logger.info("[DB] 작업자 센서 기록 조회 완료", {
     workerId,
     count: rows.length,
   });
-
-  console.log("[Worker Sensor API] 응답 완료");
 
   res.json({
     success: true,
