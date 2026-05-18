@@ -32,9 +32,9 @@ export const insertBranch = asyncHandler(async (req, res) => {
 
   await pool.execute(sql, [
     branchName,
-    address,
-    phone,
-    managerName,
+    address ?? null,
+    phone ?? null,
+    managerName ?? null,
     companyId
   ]);
 

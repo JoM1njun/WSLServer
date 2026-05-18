@@ -40,11 +40,11 @@ export const insertWorker = asyncHandler(async (req, res) => {
   await pool.execute(sql, [
     name,
     birthDate,
-    gender,
-    position,
-    bloodType,
-    emergencyContact,
-    disease,
+    gender ?? null,
+    position ?? null,
+    bloodType ?? null,
+    emergencyContact ?? null,
+    disease ?? null,
     departmentId
   ]);
 
