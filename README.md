@@ -288,8 +288,10 @@ POST /workers
 | 필드               | 타입     | 필수 | 설명       |
 | ---------------- | ------ | -- | -------- |
 | name             | String | O  | 작업자 이름   |
+| gender           | String | X  | 성별        |
+| phone            | String | X  | 전화번호     |
 | birthDate        | Date   | O  | 생년월일     |
-| gender           | String | O  | 성별       |
+| country          | String | X  | 국적     |
 | position         | String | X  | 직책       |
 | bloodType        | String | X  | 혈액형      |
 | emergencyContact | String | X  | 비상 연락처   |
