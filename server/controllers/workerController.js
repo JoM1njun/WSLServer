@@ -10,8 +10,10 @@ import { logger } from "../utils/logger.js";
 export const insertWorker = asyncHandler(async (req, res) => {
   const {
     name,
-    birthDate,
     gender,
+    phone,
+    birthDate,
+    country,
     position,
     bloodType,
     emergencyContact,
@@ -33,14 +35,16 @@ export const insertWorker = asyncHandler(async (req, res) => {
 
   const sql = `
       INSERT INTO Worker
-      (Name, Birth_date, Gender, Position, Blood_type, Emergency_contact, Disease, Department_id)
-      VALUES (?, ?, ?, ?, ?, ?, ?, ?)
+      (Name, Gender, Phone, Birth_date, Country, Position, Blood_type, Emergency_contact, Disease, Department_id)
+      VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?)
     `;
 
   await pool.execute(sql, [
     name,
-    birthDate,
     gender ?? null,
+    phone ?? null,
+    birthDate ?? null,
+    country ?? null,
     position ?? null,
     bloodType ?? null,
     emergencyContact ?? null,
