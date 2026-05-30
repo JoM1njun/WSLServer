@@ -83,42 +83,17 @@ export const insertSensorData = asyncHandler(async (req, res) => {
   // const aiResult = await aiResponse.json();
 
   const aiResult = {
-    status: 1,
+    status: 3, // 1: 정상, 2: 주의, 3: 위험
     confidence: 1,
-    message: "정상 상태"
+    message: "위험 상태"
   };
 
   logger.info("[AI Result]", aiResult);
 
-  // Sensor Log 저장
-  await pool.execute(
-    `
-    INSERT INTO Sensor
-    (
-      Worker_id,
-      Helmet_id,
-      Temperature,
-      Heart_rate,
-      ECG_value,
-      Measured_at,
-      Status
-    )
-    VALUES (?, ?, ?, ?, ?, NOW(), ?)
-    `,
-    [
-      workerId,
-      helmetId,
-      temperature,
-      heartRate,
-      ecgValue,
-      aiResult.status
-    ]
-  );
-
   // 센서 데이터 업데이트 (최신화)
   await pool.execute(
     `
-  INSERT INTO Current_Sensor_Data
+  INSERT INTO current_sensor_status
   (worker_id, helmet_id, heart_rate, temperature, ecg_abnormal, status, confidence)
   VALUES (?, ?, ?, ?, ?, ?, ?)
   ON DUPLICATE KEY UPDATE
@@ -141,7 +116,34 @@ export const insertSensorData = asyncHandler(async (req, res) => {
     ]
   );
 
-  // 4. 위험 상태면 Alert 생성
+  // 데이터 위험 시 Sensor Log 저장
+  if (aiResult.status >= 3) {
+    await pool.execute(
+      `
+    INSERT INTO Sensor
+    (
+      Worker_id,
+      Helmet_id,
+      Temperature,
+      Heart_rate,
+      ECG_value,
+      Measured_at
+    )
+    VALUES (?, ?, ?, ?, ?, NOW())
+    `,
+      [
+        workerId,
+        helmetId,
+        temperature,
+        heartRate,
+        ecgValue,
+      ]
+    );
+
+    logger.warn("[Sensor] 위험 데이터 저장 완료.");
+  }
+
+  // 위험 상태가 이전 상태와 달라졌을 때만 Alert 생성
   if (aiResult.status >= 3 && previousStatus !== aiResult.status) {
     await pool.execute(
       `
@@ -195,7 +197,7 @@ export const getLatestSensorData = asyncHandler(async (req, res) => {
 
   const [rows] = await pool.execute(`
       SELECT *
-      FROM Current_Sensor_Data
+      FROM current_sensor_status
       WHERE worker_id = ? AND helmet_id = ?
       ORDER BY updated_at DESC
     `, [workerId, helmetId]);
@@ -230,7 +232,6 @@ export const getWorkerSensorData = asyncHandler(async (req, res) => {
         Temperature,
         Heart_rate,
         ECG_value,
-        Status,
         Measured_at
       FROM Sensor
       WHERE Worker_id = ?
