@@ -23,9 +23,9 @@ class SensorData(BaseModel):
     helmetId: int
     heartRate: int
     temperature: float
-    ecgAbnormal: bool = False
-    avgHeartRate: int = 75
-    avgTemperature: float = 36.5
+    ecgAbnormal: bool
+    avgHeartRate: float
+    avgTemperature: float
     measuredAt: str | None = None
 
 
@@ -66,12 +66,14 @@ def predict(data: SensorData):
     return {
         "workerId": data.workerId,
         "helmetId": data.helmetId,
-        "statusCode": prediction,
-        "status": STATUS_LABELS[prediction],
+        "riskLevel": prediction,
+        "riskstatus": STATUS_LABELS[prediction],
         "confidence": round(probability * 100, 2),
         "message": (
-            "이상 징후가 감지되었습니다. 관리자 확인이 필요합니다."
-            if prediction != STATUS_SAFE
-            else "정상 상태입니다."
+            "위험 상태입니다. 즉시 확인이 필요합니다."
+        if prediction == STATUS_DANGER
+        else "이상 징후가 감지되었습니다. 관리자 확인이 필요합니다."
+        if prediction == STATUS_WARNING
+        else "정상 상태입니다."
         ),
     }
