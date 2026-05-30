@@ -40,11 +40,11 @@ export const insertSensorData = asyncHandler(async (req, res) => {
   });
 
   // AI 서버 요청 + timeout
-  const controller = new AbortController();
+  // const controller = new AbortController();
 
-  const timeout = setTimeout(() => {
-    controller.abort();
-  }, 3000);
+  // const timeout = setTimeout(() => {
+  //   controller.abort();
+  // }, 3000);
 
   // AI 서버 연결
   // 추후 AI 모델 서버 URL로 변경 필요
@@ -81,6 +81,12 @@ export const insertSensorData = asyncHandler(async (req, res) => {
   // }
 
   // const aiResult = await aiResponse.json();
+
+  const aiResult = {
+    status: 1,
+    confidence: 1,
+    message: "정상 상태"
+  };
 
   logger.info("[AI Result]", aiResult);
 
