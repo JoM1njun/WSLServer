@@ -57,16 +57,6 @@ export const insertSensorData = asyncHandler(async (req, res) => {
     previousStatus: previousStatus ?? "기존 상태 없음",
   });
 
-  // AI 서버 요청 + timeout
-  const [currentRows] = await pool.execute(
-    `
-  SELECT status
-  FROM current_sensor_status
-  WHERE worker_id = ? AND helmet_id = ?
-  `,
-    [workerId, helmetId]
-  );
-
   const previousStatus = currentRows[0]?.status;
 
   // 평균 센서값 조회
@@ -170,13 +160,13 @@ export const insertSensorData = asyncHandler(async (req, res) => {
       heartRate,
       temperature,
       ecgValue ? 1 : 0,
-      aiResult.status,
-      aiResult.confidence
+      aiResult.riskLevel,
+      aiResult.riskStatus
     ]
   );
 
   // 데이터 위험 시 Sensor Log 저장
-  if (aiResult.status >= 3) {
+  if (aiResult.riskLevel >= 3) {
     await pool.execute(
       `
     INSERT INTO Sensor
@@ -203,7 +193,7 @@ export const insertSensorData = asyncHandler(async (req, res) => {
   }
 
   // 위험 상태가 이전 상태와 달라졌을 때만 Alert 생성
-  if (aiResult.status >= 3 && previousStatus !== aiResult.status) {
+  if (aiResult.riskLevel >= 3 && previousStatus !== aiResult.riskLevel) {
     await pool.execute(
       `
       INSERT INTO Alert
@@ -218,14 +208,14 @@ export const insertSensorData = asyncHandler(async (req, res) => {
       [
         workerId,
         helmetId,
-        aiResult.status,
-        aiResult.message
+        aiResult.riskLevel,
+        aiResult.riskStatus
       ]
     );
     logger.warn("[Alert] Alert 생성 완료");
   } else {
     logger.info("[Alert] Alert 생성 조건 아님", {
-      status: aiResult.status,
+      status: aiResult.riskLevel,
       previousStatus,
     });
   }
