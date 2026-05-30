@@ -80,7 +80,12 @@ export const insertSensorData = asyncHandler(async (req, res) => {
     throw error;
   }
 
-  const aiResult = await aiResponse.json();
+  //const aiResult = await aiResponse.json();
+  const aiResult = {
+    status: 1,
+    confidence: 0.85,
+    message: "정상"
+  }
 
   logger.info("[AI Result]", aiResult);
 
