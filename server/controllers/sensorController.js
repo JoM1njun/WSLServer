@@ -48,44 +48,39 @@ export const insertSensorData = asyncHandler(async (req, res) => {
 
   // AI 서버 연결
   // 추후 AI 모델 서버 URL로 변경 필요
-  const aiResponse = await fetch("http://localhost:8000/predict", {
-    method: "POST",
-    headers: {
-      "Content-Type": "application/json"
-    },
-    signal: controller.signal,
-    body: JSON.stringify({
-      workerId,
-      helmetId,
-      temperature,
-      heartRate,
-      ecgAbnormal: Boolean(ecgValue)
-    })
-  });
+  // const aiResponse = await fetch("http://localhost:8000/predict", {
+  //   method: "POST",
+  //   headers: {
+  //     "Content-Type": "application/json"
+  //   },
+  //   signal: controller.signal,
+  //   body: JSON.stringify({
+  //     workerId,
+  //     helmetId,
+  //     temperature,
+  //     heartRate,
+  //     ecgAbnormal: Boolean(ecgValue)
+  //   })
+  // });
 
-  clearTimeout(timeout);
+  // clearTimeout(timeout);
 
-  console.log("[AI] AI 서버 응답 수신", {
-    statusCode: aiResponse.status,
-    ok: aiResponse.ok,
-  });
+  // console.log("[AI] AI 서버 응답 수신", {
+  //   statusCode: aiResponse.status,
+  //   ok: aiResponse.ok,
+  // });
 
-  if (!aiResponse.ok) {
-    logger.error("[AI Error] AI 서버 예측 요청 실패", {
-      statusCode: aiResponse.status,
-    });
+  // if (!aiResponse.ok) {
+  //   logger.error("[AI Error] AI 서버 예측 요청 실패", {
+  //     statusCode: aiResponse.status,
+  //   });
 
-    const error = new Error("AI 서버 예측 요청 실패");
-    error.statusCode = 502;
-    throw error;
-  }
+  //   const error = new Error("AI 서버 예측 요청 실패");
+  //   error.statusCode = 502;
+  //   throw error;
+  // }
 
-  //const aiResult = await aiResponse.json();
-  const aiResult = {
-    status: 1,
-    confidence: 0.85,
-    message: "정상"
-  }
+  // const aiResult = await aiResponse.json();
 
   logger.info("[AI Result]", aiResult);
 
