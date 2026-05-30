@@ -35,16 +35,12 @@ y = data["status"]
 X_train, X_test, y_train, y_test = train_test_split(
     X,
     y,
-    test_size=0.2, # 전체 데이터 중 20%를 테스트 데이터로 사용
-    random_state=42, # 데이터 섞는 기준 값 고정
-    stratify=y # 데이터 비율 유지하며 분리
+    test_size=0.2,  # 전체 데이터 중 20%를 테스트 데이터로 사용
+    random_state=42,  # 데이터 섞는 기준 값 고정
 )
 
 # 6. 모델 학습
-model = RandomForestClassifier(
-    n_estimators=100, # 트리 개수 (다수결)
-    random_state=42
-)
+model = RandomForestClassifier(n_estimators=100, random_state=42)  # 트리 개수 (다수결)
 
 model.fit(X_train, y_train)
 
@@ -58,3 +54,6 @@ print(classification_report(y_test, y_pred))
 joblib.dump(model, "risk_model.pkl")
 
 print("모델 저장 완료: risk_model.pkl")
+print("학습 데이터 개수:", len(data))
+print("status 분포:")
+print(data["status"].value_counts())
