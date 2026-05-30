@@ -363,7 +363,7 @@ DELETE /workers/:workerId
 ### API List
 | Method | URL                            | 설명                      |
 | ------ | ------------------------------ | ----------------------- |
-| POST   | `/sensors`                     | 센서 데이터 저장 및 AI 예측       |
+| POST   | `/sensors`                     | 센서 데이터 저장 및 AI 예측, 최신 센서 상태 저장 및 업데이트       |
 | GET    | `/sensors/:workerId/:helmetId` | 특정 작업자/헬멧의 최신 센서 데이터 조회 |
 | GET    | `/sensors/workers/:workerId`   | 특정 작업자의 센서 기록 조회        |
 
