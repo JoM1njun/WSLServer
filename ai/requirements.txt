@@ -1,5 +1,6 @@
 fastapi==0.136.1
-uvicorn==0.46.0
+uvicorn[standard]
 scikit-learn==1.7.2
 joblib==1.5.3
 pandas==2.3.3
+numpy==2.2.6
