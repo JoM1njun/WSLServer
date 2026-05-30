@@ -83,7 +83,6 @@ export const getHelmets = asyncHandler(async (req, res) => {
   `);
 
   logger.info("[DB] 헬멧 목록 조회 완료", {
-    helmetId,
     count: rows.length
   });
 
