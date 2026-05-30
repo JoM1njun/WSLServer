@@ -57,8 +57,6 @@ export const insertSensorData = asyncHandler(async (req, res) => {
     previousStatus: previousStatus ?? "기존 상태 없음",
   });
 
-  const previousStatus = currentRows[0]?.status;
-
   // 평균 센서값 조회
   const [avgRows] = await pool.execute(
     `
