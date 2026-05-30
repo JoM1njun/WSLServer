@@ -24,6 +24,24 @@ export const insertSensorData = asyncHandler(async (req, res) => {
     throw error;
   }
 
+  if (heartRate == null || temperature == null) {
+    logger.warn("[Validation Error] 센서값 누락", {
+      heartRate,
+      temperature,
+    });
+
+    const error = new Error("심박수와 체온은 필수입니다.");
+    error.statusCode = 400;
+    throw error;
+  }
+
+  if (!process.env.AI_SERVER_URL) {
+    const error = new Error("AI_SERVER_URL 환경변수가 설정되지 않았습니다.");
+    error.statusCode = 500;
+    throw error;
+  }
+
+  // 이전 상태 조회
   const [currentRows] = await pool.execute(
     `
   SELECT status
@@ -40,53 +58,94 @@ export const insertSensorData = asyncHandler(async (req, res) => {
   });
 
   // AI 서버 요청 + timeout
-  // const controller = new AbortController();
+  const [currentRows] = await pool.execute(
+    `
+  SELECT status
+  FROM current_sensor_status
+  WHERE worker_id = ? AND helmet_id = ?
+  `,
+    [workerId, helmetId]
+  );
 
-  // const timeout = setTimeout(() => {
-  //   controller.abort();
-  // }, 3000);
+  const previousStatus = currentRows[0]?.status;
+
+  // 평균 센서값 조회
+  const [avgRows] = await pool.execute(
+    `
+  SELECT
+    AVG(Heart_rate) AS avgHeartRate,
+    AVG(Temperature) AS avgTemperature
+  FROM Sensor
+  WHERE Worker_id = ?
+  `,
+    [workerId]
+  );
+
+  const avgHeartRate = Number(avgRows[0]?.avgHeartRate ?? heartRate);
+  const avgTemperature = Number(avgRows[0]?.avgTemperature ?? temperature);
+
+  logger.info("[DB] 평균 센서값 조회 완료", {
+    avgHeartRate,
+    avgTemperature,
+  });
+
+  // AI 서버 요청
+  const controller = new AbortController();
+
+  const timeout = setTimeout(() => {
+    controller.abort();
+  }, 3000);
+
+  let aiResponse;
 
   // AI 서버 연결
   // 추후 AI 모델 서버 URL로 변경 필요
-  // const aiResponse = await fetch("http://localhost:8000/predict", {
-  //   method: "POST",
-  //   headers: {
-  //     "Content-Type": "application/json"
-  //   },
-  //   signal: controller.signal,
-  //   body: JSON.stringify({
-  //     workerId,
-  //     helmetId,
-  //     temperature,
-  //     heartRate,
-  //     ecgAbnormal: Boolean(ecgValue)
-  //   })
-  // });
+  try {
+    aiResponse = await fetch(`${process.env.AI_SERVER_URL}/predict`, {
+      method: "POST",
+      headers: {
+        "Content-Type": "application/json"
+      },
+      signal: controller.signal,
+      body: JSON.stringify({
+        workerId: Number(workerId),
+        helmetId: Number(helmetId),
+        heartRate: Number(heartRate),
+        temperature: Number(temperature),
+        ecgAbnormal: Boolean(ecgValue),
+        avgHeartRate,
+        avgTemperature,
+      })
+    });
+  } catch (error) {
+    logger.error("[AI Error] AI 서버 요청 실패", {
+      message: error.message,
+    });
 
-  // clearTimeout(timeout);
+    const err = new Error("AI 서버 요청 실패");
+    err.statusCode = 502;
+    throw err;
+  } finally {
 
-  // console.log("[AI] AI 서버 응답 수신", {
-  //   statusCode: aiResponse.status,
-  //   ok: aiResponse.ok,
-  // });
+    clearTimeout(timeout);
+  }
 
-  // if (!aiResponse.ok) {
-  //   logger.error("[AI Error] AI 서버 예측 요청 실패", {
-  //     statusCode: aiResponse.status,
-  //   });
+  console.log("[AI] AI 서버 응답 수신", {
+    statusCode: aiResponse.status,
+    ok: aiResponse.ok,
+  });
 
-  //   const error = new Error("AI 서버 예측 요청 실패");
-  //   error.statusCode = 502;
-  //   throw error;
-  // }
+  if (!aiResponse.ok) {
+    logger.error("[AI Error] AI 서버 예측 요청 실패", {
+      statusCode: aiResponse.status,
+    });
 
-  // const aiResult = await aiResponse.json();
+    const error = new Error("AI 서버 예측 요청 실패");
+    error.statusCode = 502;
+    throw error;
+  }
 
-  const aiResult = {
-    status: 3, // 1: 정상, 2: 주의, 3: 위험
-    confidence: 1,
-    message: "위험 상태"
-  };
+  const aiResult = await aiResponse.json();
 
   logger.info("[AI Result]", aiResult);
 
@@ -110,7 +169,7 @@ export const insertSensorData = asyncHandler(async (req, res) => {
       helmetId,
       heartRate,
       temperature,
-      ecgValue,
+      ecgValue ? 1 : 0,
       aiResult.status,
       aiResult.confidence
     ]
@@ -176,6 +235,15 @@ export const insertSensorData = asyncHandler(async (req, res) => {
   res.json({
     success: true,
     message: "센서 데이터 추가 성공",
+    data: {
+      workerId,
+      helmetId,
+      heartRate,
+      temperature,
+      ecgValue,
+      avgHeartRate,
+      avgTemperature,
+    },
     ai: aiResult
   });
 });
