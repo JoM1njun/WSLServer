@@ -2,3 +2,4 @@ node_modules/
 venv/
 .vscode/
 .env
+ai/__pycache__/
