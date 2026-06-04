@@ -144,13 +144,13 @@ export const insertSensorData = asyncHandler(async (req, res) => {
   (worker_id, helmet_id, heart_rate, temperature, ecg_abnormal, status, confidence)
   VALUES (?, ?, ?, ?, ?, ?, ?)
   ON DUPLICATE KEY UPDATE
+    worker_id = VALUES(worker_id),
     helmet_id = VALUES(helmet_id),
     heart_rate = VALUES(heart_rate),
     temperature = VALUES(temperature),
     ecg_abnormal = VALUES(ecg_abnormal),
     status = VALUES(status),
-    confidence = VALUES(confidence),
-    updated_at = CURRENT_TIMESTAMP
+    confidence = VALUES(confidence)
   `,
     [
       workerId,
@@ -159,7 +159,7 @@ export const insertSensorData = asyncHandler(async (req, res) => {
       temperature,
       ecgValue ? 1 : 0,
       aiResult.riskLevel,
-      aiResult.riskStatus
+      aiResult.confidence,
     ]
   );
 
