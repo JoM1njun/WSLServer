@@ -203,7 +203,7 @@ export const insertSensorData = asyncHandler(async (req, res) => {
   }
 
   // 위험 상태가 이전 상태와 달라졌을 때만 Alert 생성
-  if (aiResult.riskLevel >= 3 && previousStatus !== aiResult.riskLevel) {
+  if (aiResult.riskLevel >= 2 && previousStatus !== aiResult.riskStatus) {
     await pool.execute(
       `
       INSERT INTO Alert
@@ -214,6 +214,9 @@ export const insertSensorData = asyncHandler(async (req, res) => {
         Message
       )
       VALUES (?, ?, ?, ?)
+      ON DUPLICATE KEY UPDATE
+        Status = VALUES(Status),
+        Message = VALUES(Message)
       `,
       [
         workerId,
@@ -222,13 +225,17 @@ export const insertSensorData = asyncHandler(async (req, res) => {
         aiResult.message
       ]
     );
-    logger.warn("[Alert] Alert 생성 완료");
+    logger.warn("[Alert] Alert 생성 or 업데이트 완료");
   } else {
-    logger.info("[Alert] Alert 생성 조건 아님", {
-      riskLevel: aiResult.riskLevel,
-      riskStatus: aiResult.riskStatus,
-      previousStatus,
-    });
+    await pool.execute(
+      `
+    DELETE FROM Alert
+    WHERE Worker_id = ? AND Helmet_id = ?
+    `,
+      [workerId, helmetId]
+    );
+
+    logger.info("[Alert] 정상 상태로 복귀하여 Alert 삭제");
   }
 
   logger.info("[Sensor API] 센서 데이터 저장 처리 완료");
