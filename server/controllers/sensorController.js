@@ -138,7 +138,13 @@ export const insertSensorData = asyncHandler(async (req, res) => {
   logger.info("[AI Result]", aiResult);
 
   // 센서 데이터 업데이트 (최신화)
-  await pool.execute(
+  const [dbInfo] = await pool.execute(`
+  SELECT DATABASE() AS dbName, NOW() AS dbNow
+`);
+
+  logger.info("[DB 연결 확인]", dbInfo[0]);
+
+  const [statusResult] = await pool.execute(
     `
   INSERT INTO current_sensor_status
   (worker_id, helmet_id, heart_rate, temperature, ecg_abnormal, status, confidence)
@@ -158,10 +164,16 @@ export const insertSensorData = asyncHandler(async (req, res) => {
       heartRate,
       temperature,
       ecgValue ? 1 : 0,
-      aiResult.riskLevel,
-      aiResult.confidence,
+      aiResult.riskStatus,
+      aiResult.confidence
     ]
   );
+
+  logger.info("[DB] current_sensor_status 저장 결과", {
+    affectedRows: statusResult.affectedRows,
+    insertId: statusResult.insertId,
+    changedRows: statusResult.changedRows,
+  });
 
   // 데이터 위험 시 Sensor Log 저장
   if (aiResult.riskLevel >= 3) {
@@ -206,14 +218,15 @@ export const insertSensorData = asyncHandler(async (req, res) => {
       [
         workerId,
         helmetId,
-        aiResult.riskLevel,
-        aiResult.riskStatus
+        aiResult.riskStatus,
+        aiResult.message
       ]
     );
     logger.warn("[Alert] Alert 생성 완료");
   } else {
     logger.info("[Alert] Alert 생성 조건 아님", {
-      status: aiResult.riskLevel,
+      riskLevel: aiResult.riskLevel,
+      riskStatus: aiResult.riskStatus,
       previousStatus,
     });
   }
