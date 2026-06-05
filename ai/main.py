@@ -44,8 +44,6 @@ except Exception as e:
     logger.exception("[AI Model Error] risk_model.pkl 로드 실패")
     raise e
 
-model = joblib.load("risk_model.pkl")
-
 feature_columns = [
     "heartRate",
     "temperature",

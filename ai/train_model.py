@@ -57,3 +57,12 @@ print("모델 저장 완료: risk_model.pkl")
 print("학습 데이터 개수:", len(data))
 print("status 분포:")
 print(data["status"].value_counts())
+
+def make_status(heartRate, temperature, ecgAbnormal, heartDiff, tempDiff):
+    if heartRate >= 125 or temperature >= 38.5 or heartDiff >= 50 or tempDiff >= 2.0:
+        return 3
+
+    if heartRate >= 95 or temperature >= 37.5 or ecgAbnormal or heartDiff >= 25 or tempDiff >= 1.0:
+        return 2
+
+    return 1
