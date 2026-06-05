@@ -69,11 +69,13 @@ class SensorData(BaseModel):
 STATUS_SAFE = 1
 STATUS_WARNING = 2
 STATUS_DANGER = 3
+SENSOR_ERROR = 4
 
 STATUS_LABELS = {
     STATUS_SAFE: "safe",
     STATUS_WARNING: "warning",
     STATUS_DANGER: "danger",
+    SENSOR_ERROR: "sensor_error"
 }
 
 
@@ -116,6 +118,40 @@ def health():
     }
 
 
+def rule_based_precheck(heartRate, temperature):
+    # 센서 오류 또는 비정상 측정값
+    if temperature < 30 or temperature > 42:
+        return {
+            "riskLevel": SENSOR_ERROR,
+            "riskStatus": STATUS_LABELS[SENSOR_ERROR],
+            "message": "체온 센서값이 비정상 범위입니다. 센서 상태 또는 작업자 상태 확인이 필요합니다.",
+        }
+
+    if heartRate < 35 or heartRate > 180:
+        return {
+            "riskLevel": SENSOR_ERROR,
+            "riskStatus": STATUS_LABELS[SENSOR_ERROR],
+            "message": "심박수 센서값이 비정상 범위입니다. 센서 상태 또는 작업자 상태 확인이 필요합니다.",
+        }
+
+    # 저체온 위험
+    if temperature <= 34.5:
+        return {
+            "riskLevel": STATUS_DANGER,
+            "riskStatus": STATUS_LABELS[STATUS_DANGER],
+            "message": "체온이 매우 낮습니다. 즉시 확인이 필요합니다.",
+        }
+
+    if temperature <= 35.5:
+        return {
+            "riskLevel": STATUS_WARNING,
+            "riskStatus": STATUS_LABELS[STATUS_WARNING],
+            "message": "체온이 낮습니다. 작업자 상태 확인이 필요합니다.",
+        }
+
+    return None
+
+
 @app.post("/predict")
 def predict(data: SensorData):
     try:
@@ -130,6 +166,26 @@ def predict(data: SensorData):
 
         heart_diff = data.heartRate - data.avgHeartRate
         temp_diff = data.temperature - data.avgTemperature
+
+        # =========================
+        # Rule-based Precheck
+        # =========================
+        precheck = rule_based_precheck(
+            data.heartRate, data.temperature
+        )
+
+        if precheck is not None:
+            result = {
+                "workerId": data.workerId,
+                "helmetId": data.helmetId,
+                "riskLevel": precheck["riskLevel"],
+                "riskStatus": precheck["riskStatus"],
+                "confidence": 100.0,
+                "message": precheck["message"],
+            }
+
+            logger.info(f"[Precheck Result] {result}")
+            return result
 
         features = pd.DataFrame(
             [
