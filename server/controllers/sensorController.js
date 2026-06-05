@@ -223,7 +223,7 @@ export const insertSensorData = asyncHandler(async (req, res) => {
       [
         workerId,
         helmetId,
-        aiResult.riskStatus,
+        aiResult.riskLevel,
         aiResult.message
       ]
     );
