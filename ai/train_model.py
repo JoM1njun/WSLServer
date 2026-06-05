@@ -40,7 +40,7 @@ X_train, X_test, y_train, y_test = train_test_split(
 )
 
 # 6. 모델 학습
-model = RandomForestClassifier(n_estimators=100, random_state=42)  # 트리 개수 (다수결)
+model = RandomForestClassifier(n_estimators=100, random_state=42, class_weight="balanced")  # 트리 개수 (다수결)
 
 model.fit(X_train, y_train)
 
