@@ -446,7 +446,6 @@ GET /sensors/workers/:workerId
 | ------ | --------------------------- | ---------------- |
 | GET    | `/alerts`                   | 전체 Alert 조회      |
 | GET    | `/alerts/workers/:workerId` | 특정 작업자의 Alert 조회 |
-| GET    | `/alerts/helmets/:helmetId` | 특정 헬멧의 Alert 조회  |
 
 ### 1. 전체 Alert 조회
 
@@ -500,44 +499,14 @@ GET /alerts/workers/:workerId
 ]
 } <br><br>
 
-### 3. 특정 헬멧 Alert 조회
-
-GET /alerts/helmets/:helmetId
-
-### ex: GET /alerts/helmets/1
-
-#### Request Params
-
-| 필드       | 타입     | 필수 | 설명    |
-| -------- | ------ | -- | ----- |
-| helmetId | Number | O  | 헬멧 ID |
-
-#### Response
-
-{
-"success": true,
-"data": [
-{
-"alertId": 1,
-"workerId": 1,
-"workerName": "홍길동",
-"helmetId": 1,
-"status": 2,
-"message": "심박수가 높습니다. 작업자 상태 확인이 필요합니다.",
-"createdAt": "2026-05-16T12:00:00.000Z",
-"updatedAt": "2026-05-16T12:05:00.000Z"
-}
-]
-} <br><br>
-
-### 4. Alert가 없는 경우 Response
+### 3. Alert가 없는 경우 Response
 
 {
 "success": true,
 "data": []
 } <br><br>
 
-### 5. Alert 상태 코드
+### 4. Alert 상태 코드
 
 | status | 의미    | 설명              |
 | ------ | ----- | --------------- |
