@@ -517,8 +517,8 @@ GET /alerts/workers/:workerId
 
 <br>
 
-※ Alert는 센서 데이터 예측 결과가 위험 상태일 때 생성된다.
-※ 현재 코드 기준으로 `riskLevel >= 2`일 때 Alert가 생성 또는 업데이트된다.
+※ Alert는 센서 데이터 예측 결과가 위험 상태일 때 생성된다.<br>
+※ `riskLevel >= 2`일 때 Alert가 생성 또는 업데이트된다.<br>
 ※ 작업자가 정상 상태로 복귀하면 해당 Alert는 삭제된다.
 <br><br><br>
 
