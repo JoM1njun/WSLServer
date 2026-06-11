@@ -6,6 +6,7 @@ import departmentRoutes from "./routes/departmentRoutes.js";
 import workerRoutes from "./routes/workerRoutes.js";
 import helmetRoutes from "./routes/helmetRoutes.js";
 import sensorRoutes from "./routes/sensorRoutes.js";
+import alertRoutes from "./routes/alertRoutes.js";
 import { errorHandler } from "./middlewares/errorHandler.js";
 
 const app = express();
@@ -20,6 +21,7 @@ app.use("/api/departments", departmentRoutes);
 app.use("/api/workers", workerRoutes);
 app.use("/api/helmets", helmetRoutes);
 app.use("/api/sensors", sensorRoutes);
+app.use("/api/alerts", alertRoutes);
 
 app.use(errorHandler);
 
