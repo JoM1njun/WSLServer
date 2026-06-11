@@ -438,6 +438,121 @@ GET /sensors/workers/:workerId
   ]
 } <br><br><br>
 
+## Alert API
+
+### API List
+
+| Method | URL                         | 설명               |
+| ------ | --------------------------- | ---------------- |
+| GET    | `/alerts`                   | 전체 Alert 조회      |
+| GET    | `/alerts/workers/:workerId` | 특정 작업자의 Alert 조회 |
+| GET    | `/alerts/helmets/:helmetId` | 특정 헬멧의 Alert 조회  |
+
+### 1. 전체 Alert 조회
+
+GET /alerts
+
+#### Response
+
+{
+"success": true,
+"data": [
+{
+"alertId": 1,
+"workerId": 1,
+"workerName": "홍길동",
+"helmetId": 1,
+"status": 2,
+"message": "심박수가 높습니다. 작업자 상태 확인이 필요합니다.",
+"createdAt": "2026-05-16T12:00:00.000Z",
+"updatedAt": "2026-05-16T12:05:00.000Z"
+}
+]
+} <br><br>
+
+### 2. 특정 작업자 Alert 조회
+
+GET /alerts/workers/:workerId
+
+### ex: GET /alerts/workers/1
+
+#### Request Params
+
+| 필드       | 타입     | 필수 | 설명     |
+| -------- | ------ | -- | ------ |
+| workerId | Number | O  | 작업자 ID |
+
+#### Response
+
+{
+"success": true,
+"data": [
+{
+"alertId": 1,
+"workerId": 1,
+"workerName": "홍길동",
+"helmetId": 1,
+"status": 2,
+"message": "심박수가 높습니다. 작업자 상태 확인이 필요합니다.",
+"createdAt": "2026-05-16T12:00:00.000Z",
+"updatedAt": "2026-05-16T12:05:00.000Z"
+}
+]
+} <br><br>
+
+### 3. 특정 헬멧 Alert 조회
+
+GET /alerts/helmets/:helmetId
+
+### ex: GET /alerts/helmets/1
+
+#### Request Params
+
+| 필드       | 타입     | 필수 | 설명    |
+| -------- | ------ | -- | ----- |
+| helmetId | Number | O  | 헬멧 ID |
+
+#### Response
+
+{
+"success": true,
+"data": [
+{
+"alertId": 1,
+"workerId": 1,
+"workerName": "홍길동",
+"helmetId": 1,
+"status": 2,
+"message": "심박수가 높습니다. 작업자 상태 확인이 필요합니다.",
+"createdAt": "2026-05-16T12:00:00.000Z",
+"updatedAt": "2026-05-16T12:05:00.000Z"
+}
+]
+} <br><br>
+
+### 4. Alert가 없는 경우 Response
+
+{
+"success": true,
+"data": []
+} <br><br>
+
+### 5. Alert 상태 코드
+
+| status | 의미    | 설명              |
+| ------ | ----- | --------------- |
+| 1      | 안전    | 정상 상태           |
+| 2      | 주의    | 확인이 필요한 상태      |
+| 3      | 위험    | 즉시 확인이 필요한 상태   |
+| 4      | 센서 오류 | 센서값이 비정상 범위인 상태 |
+
+<br>
+
+※ Alert는 센서 데이터 예측 결과가 위험 상태일 때 생성된다.
+※ 현재 코드 기준으로 `riskLevel >= 2`일 때 Alert가 생성 또는 업데이트된다.
+※ 작업자가 정상 상태로 복귀하면 해당 Alert는 삭제된다.
+<br><br><br>
+
 ## Helmet API
 ### API List
 | Method | URL | 설명 |
