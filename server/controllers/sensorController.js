@@ -218,7 +218,8 @@ export const insertSensorData = asyncHandler(async (req, res) => {
       VALUES (?, ?, ?, ?)
       ON DUPLICATE KEY UPDATE
         Status = VALUES(Status),
-        Message = VALUES(Message)
+        Message = VALUES(Message),
+        Updated_at = CURRENT_TIMESTAMP
       `,
       [
         workerId,

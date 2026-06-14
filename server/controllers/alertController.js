@@ -16,6 +16,7 @@ export const getAlerts = asyncHandler(async (req, res) => {
       a.Updated_at AS updatedAt
     FROM Alert a
     LEFT JOIN Worker w ON a.Worker_id = w.ID
+    WHERE a.Worker_id = ?
     ORDER BY a.Updated_at DESC
   `;
 
