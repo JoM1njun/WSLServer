@@ -187,7 +187,7 @@ export const insertSensorData = asyncHandler(async (req, res) => {
       Heart_rate,
       ECG_value,
       Measured_at,
-      Status_Level
+      StatusLevel
     )
     VALUES (?, ?, ?, ?, ?, NOW(), ?)
     `,
