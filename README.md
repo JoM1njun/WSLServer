@@ -55,11 +55,13 @@ Alert 생성/업데이트
 
 ## Server Structure
 
+```text
 server/
 ├── controllers/
 ├── routes/
 ├── middleware/
 └── utils/
+```
 
 ## server(Directory) => Web or App Server
 ### controllers = DB Insert, Delete, Select etc Function (요청 & 응답 처리)
