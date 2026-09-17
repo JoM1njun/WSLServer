@@ -81,7 +81,9 @@ server/
 | Sensor     | `/sensors`     | 센서 데이터 및 AI 예측 관리 |
 <br>
 
-### ex: https://서버URL/workers OR https://서버URL/workers/workerId
+```text
+ex: https://서버URL/workers OR https://서버URL/workers/workerId
+```
 <br>
 
 ## Company API
@@ -110,7 +112,9 @@ GET /company
 } <br><br>
 ### 2. 특정 회사 조회
 GET /company/:companyId
-#### ex: GET /company/1
+```text
+ex: GET /company/1
+```
 
 #### Response
 {
@@ -138,7 +142,9 @@ POST /company
 } <br><br>
 ### 4. 회사 삭제
 DELETE /company/:companyId
-### ex: DELETE /company/1
+```text
+ex: DELETE /company/1
+```
 
 ### Response
 {
@@ -175,7 +181,9 @@ GET /branches
 
 ### 2. 특정 지점 조회
 GET /branches/:branchId
-### ex: GET /branches/1
+```text
+ex: GET /branches/1
+```
 
 #### Response
 {
@@ -210,7 +218,9 @@ POST /branches
 
 ### 4. 지점 삭제
 DELETE /branches/:branchId
-### ex: DELETE /branches/1
+```text
+ex: DELETE /branches/1
+```
 
 #### Response
 {
@@ -247,7 +257,9 @@ GET /departments
 
 ### 2. 특정 부서 조회
 GET /departments/:departmentId
-### ex: GET /departments/1
+```text
+ex: GET /departments/1
+```
 
 #### Response
 {
@@ -280,7 +292,9 @@ POST /departments
 
 ### 4. 부서 삭제
 DELETE /departments/:departmentId
-### ex: DELETE /departments/1
+```text
+ex: DELETE /departments/1
+```
 
 #### Response
 {
@@ -323,7 +337,9 @@ GET /workers
 
 ### 2. 특정 작업자 조회
 GET /workers/:workerId
-### ex: GET /workers/1
+```text
+ex: GET /workers/1
+```
 
 #### Response
 {
@@ -415,7 +431,9 @@ PATCH /workers/:workerId
 
 ### 5. 작업자 삭제
 DELETE /workers/:workerId
-### ex: DELETE /workers/1
+```text
+ex: DELETE /workers/1
+```
 
 #### Response
 {
@@ -464,7 +482,9 @@ POST /sensors
 
 ### 2. 최근 센서 데이터 조회
 GET /sensors/:workerId/:helmetId
-### ex: GET /sensors/1/1
+```text
+ex: GET /sensors/1/1
+```
 
 #### Response
 {
@@ -485,7 +505,9 @@ GET /sensors/:workerId/:helmetId
 
 ### 3. 특정 작업자 센서 기록 조회
 GET /sensors/workers/:workerId
-### ex: GET /sensors/workers/1
+```text
+ex: GET /sensors/workers/1
+```
 
 #### Response
 {
@@ -537,7 +559,9 @@ GET /alerts
 
 GET /alerts/workers/:workerId
 
-### ex: GET /alerts/workers/1
+```text
+ex: GET /alerts/workers/1
+```
 
 #### Request Params
 
@@ -612,7 +636,9 @@ GET /helmets
 
 ### 2. 특정 헬멧 조회
 GET /helmets/:helmetId
-### ex: GET /helmets/1
+```text
+ex: GET /helmets/1
+```
 
 ### 3. 헬멧 추가
 POST /helmets
