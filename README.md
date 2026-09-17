@@ -1,7 +1,70 @@
+# Safety Helmet Server
+
+근로자의 체온, 심박수, ECG 데이터를 수집하고
+AI 예측 결과를 기반으로 작업자의 상태를 관리하는
+안전모 프로젝트의 백엔드 서버입니다.
+
+## Overview
+
+ESP32에서 전달받은 센서 데이터를 Express 서버에서 처리하고,
+MySQL에 저장한 뒤 Python AI 서버에 전달하여 위험 상태를 예측합니다.
+
+### Data Flow
+
+ESP32
+↓
+Express Server
+↓
+MySQL
+↓
+Python AI Server
+↓
+위험도 판단
+↓
+Alert 생성/업데이트
+
+## Tech Stack
+
+- Language: JavaScript, Python
+- Backend: Express, FastAPI
+- Runtime: Node.js
+- Database: MySQL
+- Environment: WSL Ubuntu
+
+## Logging & Error Handling
+
+개발 과정에서 오류가 발생했을 때 기본 로그만으로는
+문제 상황과 발생 시점을 확인하기 어려운 경우가 있었습니다.
+
+이를 개선하기 위해 요청/응답 정보와 DB 처리 결과,
+오류 정보를 기록하는 로깅 기능을 구현했습니다.
+
+- 요청 Method / URL 기록
+- Params / Query / Body 기록
+- Response Status / 처리 시간 기록
+- DB 처리 결과 기록
+- 입력값 검증 및 경고 로그
+- 비동기 오류 공통 처리
+- 공통 오류 응답 처리
+
+관련 코드:
+- `middleware/requestLogger.js`
+- `middleware/errorHandler.js`
+- `utils/logger.js`
+- `utils/asyncHandler.js`
+
+## Server Structure
+
+server/
+├── controllers/
+├── routes/
+├── middleware/
+└── utils/
+
 ## server(Directory) => Web or App Server
 ### controllers = DB Insert, Delete, Select etc Function (요청 & 응답 처리)
 ### routes = URL Connect (각 DB Controller Server.js와 연결)
-### middlewear = Exception & Error Handling (예외처리 및 오류처리)
+### middleware = Exception & Error Handling (예외처리 및 오류처리)
 ### utils = Public Function (공통 기능 함수)
 <br><br>
 
@@ -155,7 +218,7 @@ DELETE /branches/:branchId
 } <br><br><br>
 
 
-## Departemt API
+## Department API
 ### API List
 | Method | URL                          | 설명          |
 | ------ | ---------------------------- | ----------- |
