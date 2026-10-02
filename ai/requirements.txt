@@ -5,3 +5,4 @@ joblib==1.5.3
 pandas==2.3.3
 numpy==2.2.6
 pytest
+httpx2

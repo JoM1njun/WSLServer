@@ -14,12 +14,22 @@ def test_predict():
             response = client.post(
                 "/predict",
                 json={
-                    "heartRate": float(row["heartRate"]),
+                    "workerId": int(row["workerId"]),
+                    "helmetId": int(row["helmetId"]),
+                    "heartRate": int(row["heartRate"]),
                     "temperature": float(row["temperature"]),
-                    "ecgValue": float(row["ecgValue"])
-                }
+                    "ecgAbnormal": row["ecgAbnormal"].lower() == "true",
+                    "avgHeartRate": float(row["avgHeartRate"]),
+                    "avgTemperature": float(row["avgTemperature"]),
+                },
             )
 
             assert response.status_code == 200
-            assert "risk" in response.json()
-            assert response.json()["risk"] == int(row["risk"])
+
+            result = response.json()
+
+            assert "riskLevel" in result
+            assert "riskStatus" in result
+            assert "confidence" in result
+
+            assert result["riskLevel"] == int(row["riskLevel"])
