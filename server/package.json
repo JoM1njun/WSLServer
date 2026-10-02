@@ -1,6 +1,7 @@
 {
   "devDependencies": {
-    "prettier": "^3.8.3"
+    "prettier": "^3.8.3",
+    "vitest": "..."
   },
   "dependencies": {
     "cors": "^2.8.6",
