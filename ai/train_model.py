@@ -17,6 +17,28 @@ if "heartDiff" not in data.columns:
 if "tempDiff" not in data.columns:
     data["tempDiff"] = data["temperature"] - data["avgTemperature"]
 
+
+def make_status(heartRate, temperature, ecgAbnormal, heartDiff, tempDiff):
+    if heartRate >= 125 or temperature >= 38.5 or heartDiff >= 50 or tempDiff >= 2.0:
+        return 3
+
+    if heartRate >= 95 or temperature >= 37.5 or ecgAbnormal or heartDiff >= 25 or tempDiff >= 1.0:
+        return 2
+
+    return 1
+
+data["status"] = data.apply(
+    lambda row: make_status(
+        row["heartRate"],
+        row["temperature"],
+        row["ecgAbnormal"],
+        row["heartDiff"],
+        row["tempDiff"],
+    ),
+    axis=1,
+)
+
+
 # 4. 입력 데이터와 정답 데이터 분리
 feature_columns = [
     "heartRate",
@@ -57,12 +79,3 @@ print("모델 저장 완료: risk_model.pkl")
 print("학습 데이터 개수:", len(data))
 print("status 분포:")
 print(data["status"].value_counts())
-
-def make_status(heartRate, temperature, ecgAbnormal, heartDiff, tempDiff):
-    if heartRate >= 125 or temperature >= 38.5 or heartDiff >= 50 or tempDiff >= 2.0:
-        return 3
-
-    if heartRate >= 95 or temperature >= 37.5 or ecgAbnormal or heartDiff >= 25 or tempDiff >= 1.0:
-        return 2
-
-    return 1
