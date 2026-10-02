@@ -11,7 +11,7 @@ client = TestClient(app)
 
 
 def test_predict():
-    with open("sensor_data.csv", newline="") as file:
+    with open("test_data.csv", newline="") as file:
         reader = csv.DictReader(file)
 
         for row in reader:
