@@ -1,6 +1,6 @@
+import csv
 import sys
 from pathlib import Path
-import csv
 
 sys.path.append(str(Path(__file__).resolve().parent.parent))
 
@@ -11,18 +11,18 @@ client = TestClient(app)
 
 
 def test_predict():
-    with open("data/test_data.csv", newline="") as file:
+    with open("sensor_data.csv", newline="") as file:
         reader = csv.DictReader(file)
 
         for row in reader:
             response = client.post(
                 "/predict",
                 json={
-                    "workerId": int(row["workerId"]),
-                    "helmetId": int(row["helmetId"]),
+                    "workerId": 1,
+                    "helmetId": 1,
                     "heartRate": int(row["heartRate"]),
                     "temperature": float(row["temperature"]),
-                    "ecgAbnormal": row["ecgAbnormal"].lower() == "true",
+                    "ecgAbnormal": bool(int(row["ecgAbnormal"])),
                     "avgHeartRate": float(row["avgHeartRate"]),
                     "avgTemperature": float(row["avgTemperature"]),
                 },
@@ -36,4 +36,4 @@ def test_predict():
             assert "riskStatus" in result
             assert "confidence" in result
 
-            assert result["riskLevel"] == int(row["riskLevel"])
+            assert result["riskLevel"] == int(row["status"])
