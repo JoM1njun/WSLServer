@@ -1,6 +1,7 @@
 import os
 import time
 from pathlib import Path
+from datetime import datetime, timezone, timedelta
 
 from google import genai
 from google.genai import errors
@@ -9,6 +10,8 @@ ROOT_DIR = Path(__file__).resolve().parent.parent
 
 ERROR_LOG = ROOT_DIR / "error.log"
 ANALYSIS_LOG = ROOT_DIR / "analysis.log"
+
+KST = timezone(timedelta(hours=9))
 
 def analyze_error(error_log):
     client = genai.Client(
@@ -65,6 +68,9 @@ def analyze_error(error_log):
 
 
 def main():
+    started_at = datetime.now(KST).strftime("%Y-%m-%d %H:%M:%S KST")
+    finished_at = datetime.now(KST).strftime("%Y-%m-%d %H:%M:%S KST")
+    
     if not ERROR_LOG.exists():
         print(f"error.log 파일을 찾을 수 없습니다: {ERROR_LOG}")
         exit(1)
@@ -73,13 +79,18 @@ def main():
 
     result = analyze_error(error_log)
 
-    print("===================================")
-    print("AI ERROR ANALYSIS")
-    print("===================================")
-    print(result)
+    analysis_content = f"""===================================
+AI ERROR ANALYSIS
+===================================
+Analysis Started At: {started_at}
+
+{result}
+
+Analysis Finished At: {finished_at}
+"""
 
     ANALYSIS_LOG.write_text(
-        result,
+        analysis_content,
         encoding="utf-8"
     )
 
