@@ -94,56 +94,91 @@ log "Actions 결과: $CONCLUSION"
 
 
 # -----------------------------------
-# 5. 실패한 경우 로그 다운로드
+# 5. 결과 로그 다운로드
 # -----------------------------------
 
-if [ "$CONCLUSION" = "failure" ]; then
+log "테스트 결과 로그 다운로드 시작"
 
-    log "테스트 실패 감지"
-    log "로그 다운로드 시작"
+rm -rf "$LOG_DIR"
+mkdir -p "$LOG_DIR"
 
-    rm -rf "$LOG_DIR"
-    mkdir -p "$LOG_DIR"
+if gh run download "$RUN_ID" \
+    --repo "$REPO" \
+    --name test-logs \
+    --dir "$LOG_DIR"
+then
 
-    if gh run download "$RUN_ID" \
-        --repo "$REPO" \
-        --name test-logs \
-        --dir "$LOG_DIR"
-    then
+    log "Artifact 다운로드 성공"
 
-        log "Artifact 다운로드 성공"
+    echo "==================================="
+    echo "다운로드된 파일"
+    echo "==================================="
 
-        echo "===== 다운로드된 파일 ====="
-        find "$LOG_DIR" -type f -print
-
-
-        # error.log
-        if [ -f "$LOG_DIR/error.log" ]; then
-            cp "$LOG_DIR/error.log" "$ERROR_LOG"
-            log "error.log 복사 완료"
-        else
-            log "error.log를 찾을 수 없습니다."
-        fi
+    find "$LOG_DIR" -type f -print
 
 
-        # analysis.log
-        if [ -f "$LOG_DIR/analysis.log" ]; then
-            cp "$LOG_DIR/analysis.log" "$ANALYSIS_LOG"
-            log "analysis.log 복사 완료"
-        else
-            log "analysis.log를 찾을 수 없습니다."
-        fi
+    # -----------------------------------
+    # error.log 복사
+    # -----------------------------------
 
-        log "로그 다운로드 완료"
-
+    if [ -f "$LOG_DIR/error.log" ]; then
+        cp "$LOG_DIR/error.log" "$ERROR_LOG"
+        log "error.log 복사 완료"
     else
-        log "Artifact 다운로드 실패"
-        exit 1
+        log "error.log를 찾을 수 없습니다."
     fi
+
+
+    # -----------------------------------
+    # analysis.log 복사
+    # -----------------------------------
+
+    if [ -f "$LOG_DIR/analysis.log" ]; then
+        cp "$LOG_DIR/analysis.log" "$ANALYSIS_LOG"
+        log "analysis.log 복사 완료"
+    else
+        log "analysis.log를 찾을 수 없습니다."
+    fi
+
+
+    # -----------------------------------
+    # 터미널에 로그 출력
+    # -----------------------------------
+
+    echo ""
+    echo "==================================="
+    echo "ERROR LOG"
+    echo "==================================="
+
+    if [ -f "$ERROR_LOG" ]; then
+        cat "$ERROR_LOG"
+    else
+        echo "테스트 성공!"
+        echo "error.log가 없습니다."
+    fi
+
+
+    echo ""
+    echo "==================================="
+    echo "AI ANALYSIS LOG"
+    echo "==================================="
+
+    if [ -f "$ANALYSIS_LOG" ]; then
+        cat "$ANALYSIS_LOG"
+    else
+        echo "analysis.log가 없습니다."
+    fi
+
+
+    echo ""
+    echo "==================================="
+    log "로그 처리 완료"
+    echo "==================================="
 
 else
 
-    log "테스트가 실패하지 않았습니다."
+    log "Artifact 다운로드 실패"
+    exit 1
 
 fi
 
