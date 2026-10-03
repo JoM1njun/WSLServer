@@ -59,7 +59,9 @@ def analyze_error(error_log):
             if attempt == 2:
                 raise
 
-            time.sleep(10)
+            wait_time = 10 * (2 ** attempt)
+            print(f"{wait_time}초 후 재시도합니다.")
+            time.sleep(wait_time)
 
 
 def main():
