@@ -4,3 +4,4 @@ venv/
 .env
 ai/__pycache__/
 ai/risk_model.pkl
+ai/error.log
