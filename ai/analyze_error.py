@@ -1,7 +1,9 @@
 import os
+import time
 import sys
 
 from google import genai
+from google.genai import errors
 
 
 def analyze_error(error_log):
@@ -35,13 +37,25 @@ def analyze_error(error_log):
 코드를 임의로 수정하지 말고,
 로그에서 확인할 수 있는 사실과 추론을 구분해서 설명해라.
 """
+    for attempt in range(3):
+        try:
+            response = client.models.generate_content(
+                model=model,
+                contents=prompt,
+            )
 
-    response = client.models.generate_content(
-        model=model,
-        contents=prompt,
-    )
+            return response.text
 
-    return response.text
+        except errors.ServerError as e:
+            print(
+                f"Gemini API 서버 오류 "
+                f"(시도 {attempt + 1}/3): {e}"
+            )
+
+            if attempt == 2:
+                raise
+
+            time.sleep(10)
 
 
 if __name__ == "__main__":
