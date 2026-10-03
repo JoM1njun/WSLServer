@@ -33,8 +33,12 @@ jobs:
       - name: Install dependencies
         run: npm ci
 
-      - name: Run Server tests
-        run: npm test
+      - name: Run server tests
+        id: tests
+        continue-on-error: true
+        run: |
+          set -o pipefail
+          npm test -- --run 2>&1 | tee error.log
 
   ai-test:
     runs-on: ubuntu-latest
