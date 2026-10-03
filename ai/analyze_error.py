@@ -36,7 +36,7 @@ def analyze_error(error_log):
 로그에서 확인할 수 있는 사실과 추론을 구분해서 설명해라.
 """
 
-    response = client.models.responses.create(
+    response = client.models.generate_content(
         model=model,
         contents=prompt,
     )
