@@ -12,17 +12,16 @@ on:
       - develop
 
 jobs:
-  server-test:
+  test-and-analyze:
     runs-on: ubuntu-latest
-
-    defaults:
-      run:
-        working-directory: server
 
     steps:
       - name: Checkout repository
         uses: actions/checkout@v4
 
+      # -----------------------------
+      # Node.js
+      # -----------------------------
       - name: Setup Node.js
         uses: actions/setup-node@v4
         with:
@@ -30,54 +29,70 @@ jobs:
           cache: npm
           cache-dependency-path: server/package-lock.json
 
-      - name: Install dependencies
+      - name: Install server dependencies
+        working-directory: server
         run: npm ci
 
-      - name: Run server tests
-        id: tests
-        continue-on-error: true
-        run: |
-          set -o pipefail
-          npm test -- --run 2>&1 | tee error.log
-
-  ai-test:
-    runs-on: ubuntu-latest
-
-    defaults:
-      run:
-        working-directory: ai
-
-    steps:
-      - name: Checkout repository
-        uses: actions/checkout@v4
-
+      # -----------------------------
+      # Python
+      # -----------------------------
       - name: Setup Python
         uses: actions/setup-python@v5
         with:
           python-version: "3.12"
 
-      - name: Install dependencies
+      - name: Install AI dependencies
+        working-directory: ai
         run: pip install -r requirements.txt
 
       - name: Train model
+        working-directory: ai
         run: python train_model.py
 
-      - name: Run tests
-        id: tests
+      # -----------------------------
+      # Initialize error log
+      # -----------------------------
+      - name: Initialize error log
+        run: |
+          : > error.log
+
+      # -----------------------------
+      # Server test
+      # -----------------------------
+      - name: Run server tests
+        id: server_tests
         continue-on-error: true
-        run: set -o pipefail
-          pytest 2>&1 | tee error.log
+        working-directory: server
+        run: |
+          echo "========== SERVER TEST ==========" >> ../error.log
+          set -o pipefail
+          npm test -- --run 2>&1 | tee -a ../error.log
 
-      - name: Analyze test error
-        if: steps.tests.outcome == 'failure'
-        run: python analyze_error.py
-        env:
-          OPENAI_API_KEY: ${{ secrets.AI_API_KEY }}
-          OPENAI_MODEL: gemini-3.8-flash
-
-      - name: Check test result
-        if: steps.tests.outcome == 'failure'
-        run: exit 1
-
+      # -----------------------------
+      # AI test
+      # -----------------------------
       - name: Run AI tests
-        run: pytest
+        id: ai_tests
+        continue-on-error: true
+        working-directory: ai
+        run: |
+          echo "========== AI TEST ==========" >> ../error.log
+          set -o pipefail
+          pytest 2>&1 | tee -a ../error.log
+
+      # -----------------------------
+      # Gemini analysis
+      # -----------------------------
+      - name: Analyze test error
+        if: steps.server_tests.outcome == 'failure' || steps.ai_tests.outcome == 'failure'
+        run: python ai/analyze_error.py
+        env:
+          GEMINI_API_KEY: ${{ secrets.AI_API_KEY }}
+          GEMINI_MODEL: gemini-3.8-flash
+
+      # -----------------------------
+      # Final result
+      # -----------------------------
+      - name: Check test result
+        if: steps.server_tests.outcome == 'failure' || steps.ai_tests.outcome == 'failure'
+        run: exit 1
