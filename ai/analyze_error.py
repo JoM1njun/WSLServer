@@ -36,12 +36,12 @@ def analyze_error(error_log):
 로그에서 확인할 수 있는 사실과 추론을 구분해서 설명해라.
 """
 
-    response = client.responses.create(
+    response = client.models.responses.create(
         model=model,
-        input=prompt,
+        contents=prompt,
     )
 
-    return response.output_text
+    return response.text
 
 
 if __name__ == "__main__":
