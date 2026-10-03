@@ -3,7 +3,12 @@
 REPO="JoM1njun/WSLServer"
 WORKFLOW="AI Test Analysis"
 
-STATE_FILE=".last_run_id"
+SCRIPT_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
+
+STATE_FILE="$SCRIPT_DIR/.last_run_id"
+LOG_DIR="$SCRIPT_DIR/.github-logs"
+ERROR_LOG="$SCRIPT_DIR/error.log"
+ANALYSIS_LOG="$SCRIPT_DIR/analysis.log"
 
 # 이전에 처리한 Run ID 불러오기
 if [ -f "$STATE_FILE" ]; then
@@ -18,6 +23,9 @@ echo "Repo: $REPO"
 echo "Workflow: $WORKFLOW"
 echo "Last Run ID: ${LAST_RUN_ID:-없음}"
 echo "==================================="
+
+echo "현재 작업 디렉터리: $(pwd)"
+echo "Watcher 위치: $(dirname "$(realpath "$0")")"
 
 while true
 do
@@ -67,22 +75,28 @@ do
         echo "테스트 실패 감지"
         echo "로그 다운로드 중..."
 
-        rm -rf .github-logs
-        mkdir -p .github-logs
+        rm -rf "$LOG_DIR"
+        mkdir -p "$LOG_DIR"
 
         if gh run download "$RUN_ID" \
             --repo "$REPO" \
             --name test-logs \
-            --dir .github-logs
+            --dir "$LOG_DIR"
         then
             echo "Artifact 다운로드 성공"
 
-            if [ -f ".github-logs/error.log" ]; then
-                cp ".github-logs/error.log" "./error.log"
+            echo "현재 위치: $(pwd)"
+            echo "===== 다운로드된 파일 ====="
+            find "$LOG_DIR" -type f -print
+
+            if [ -f "$LOG_DIR/error.log" ]; then
+                cp "$LOG_DIR/error.log" "$ERROR_LOG"
+                echo "error.log 복사 완료"
             fi
 
-            if [ -f ".github-logs/analysis.log" ]; then
-                cp ".github-logs/analysis.log" "./analysis.log"
+            if [ -f "$LOG_DIR/analysis.log" ]; then
+                cp "$LOG_DIR/analysis.log" "$ANALYSIS_LOG"
+                echo "analysis.log 복사 완료"
             fi
 
             echo "로그 다운로드 완료"
