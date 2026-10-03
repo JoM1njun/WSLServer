@@ -4,4 +4,7 @@ venv/
 .env
 ai/__pycache__/
 ai/risk_model.pkl
-ai/error.log
+.last_run_id
+.github-logs/
+error.log
+analysis.log
