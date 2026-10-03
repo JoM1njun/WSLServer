@@ -12,6 +12,7 @@ on:
       - develop
 
 env:
+  TZ: Asia/Seoul
   LANG: C.UTF-8
   LC_ALL: C.UTF-8
   PYTHONUTF8: "1"
@@ -70,9 +71,15 @@ jobs:
         continue-on-error: true
         working-directory: server
         run: |
-          echo "========== SERVER TEST ==========" >> ../error.log
+          echo "===================================" >> ../error.log
+          echo "SERVER TEST" >> ../error.log
+          echo "Started At: $(date '+%Y-%m-%d %H:%M:%S %Z')" >> ../error.log
+          echo "===================================" >> ../error.log
+
           set -o pipefail
           npm test -- --run --reporter=verbose | tee -a ../error.log
+
+          echo "Finished At: $(date '+%Y-%m-%d %H:%M:%S %Z')" >> ../error.log
 
       # -----------------------------
       # AI test
@@ -82,9 +89,15 @@ jobs:
         continue-on-error: true
         working-directory: ai
         run: |
-          echo "========== AI TEST ==========" >> ../error.log
+          echo "===================================" >> ../error.log
+          echo "AI TEST" >> ../error.log
+          echo "Started At: $(date '+%Y-%m-%d %H:%M:%S %Z')" >> ../error.log
+          echo "===================================" >> ../error.log
+
           set -o pipefail
           pytest 2>&1 | tee -a ../error.log
+
+          echo "Finished At: $(date '+%Y-%m-%d %H:%M:%S %Z')" >> ../error.log
 
       # -----------------------------
       # Gemini analysis
