@@ -58,3 +58,6 @@ if __name__ == "__main__":
     print("AI ERROR ANALYSIS")
     print("===================================")
     print(result)
+
+    with open("analysis.log", "w", encoding="utf-8") as file:
+        file.write(result)
