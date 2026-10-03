@@ -1,10 +1,14 @@
 import os
 import time
-import sys
+from pathlib import Path
 
 from google import genai
 from google.genai import errors
 
+ROOT_DIR = Path(__file__).resolve().parent.parent
+
+ERROR_LOG = ROOT_DIR / "error.log"
+ANALYSIS_LOG = ROOT_DIR / "analysis.log"
 
 def analyze_error(error_log):
     client = genai.Client(
@@ -58,13 +62,12 @@ def analyze_error(error_log):
             time.sleep(10)
 
 
-if __name__ == "__main__":
-    try:
-        with open("error.log", "r", encoding="utf-8") as file:
-            error_log = file.read()
-    except FileNotFoundError:
-        print("error.log 파일을 찾을 수 없습니다.")
+def main():
+    if not ERROR_LOG.exists():
+        print(f"error.log 파일을 찾을 수 없습니다: {ERROR_LOG}")
         exit(1)
+
+    error_log = ERROR_LOG.read_text(encoding="utf-8")
 
     result = analyze_error(error_log)
 
@@ -73,5 +76,13 @@ if __name__ == "__main__":
     print("===================================")
     print(result)
 
-    with open("analysis.log", "w", encoding="utf-8") as file:
-        file.write(result)
+    ANALYSIS_LOG.write_text(
+        result,
+        encoding="utf-8"
+    )
+
+    print(f"분석 로그 저장 완료: {ANALYSIS_LOG}")
+
+
+if __name__ == "__main__":
+    main()
