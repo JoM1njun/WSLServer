@@ -78,7 +78,7 @@ jobs:
         run: |
           echo "========== AI TEST ==========" >> ../error.log
           set -o pipefail
-          pytest 2>&1 | tee error.log
+          pytest 2>&1 | tee -a ../error.log
 
       # -----------------------------
       # Gemini analysis
@@ -97,11 +97,15 @@ jobs:
         if: steps.server_tests.outcome == 'failure' || steps.ai_tests.outcome == 'failure'
         run: exit 1
 
+      # -----------------------------
+      # Upload logs
+      # -----------------------------
       - name: Upload test logs
         if: always()
         uses: actions/upload-artifact@v4
         with:
           name: test-logs
           path: |
-            ai/error.log
-            ai/analysis.log
+            error.log
+            analysis.log
+          if-no-files-found: warn
