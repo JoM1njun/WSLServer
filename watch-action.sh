@@ -1,119 +1,160 @@
 #!/bin/bash
 
+set -u
+
 REPO="JoM1njun/WSLServer"
 WORKFLOW="AI Test Analysis"
 
 SCRIPT_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
 
-STATE_FILE="$SCRIPT_DIR/.last_run_id"
 LOG_DIR="$SCRIPT_DIR/.github-logs"
 ERROR_LOG="$SCRIPT_DIR/error.log"
 ANALYSIS_LOG="$SCRIPT_DIR/analysis.log"
 
-# 이전에 처리한 Run ID 불러오기
-if [ -f "$STATE_FILE" ]; then
-    LAST_RUN_ID=$(cat "$STATE_FILE")
-else
-    LAST_RUN_ID=""
-fi
+log() {
+    echo "[$(TZ=Asia/Seoul date '+%Y-%m-%d %H:%M:%S KST')] $1"
+}
 
-echo "==================================="
-echo "GitHub Actions Watcher 시작"
-echo "Repo: $REPO"
-echo "Workflow: $WORKFLOW"
-echo "Last Run ID: ${LAST_RUN_ID:-없음}"
-echo "==================================="
+log "==================================="
+log "GitHub Actions Watcher 시작"
+log "Repo: $REPO"
+log "Workflow: $WORKFLOW"
+log "Watcher 위치: $SCRIPT_DIR"
+log "==================================="
 
-echo "현재 작업 디렉터리: $(pwd)"
-echo "Watcher 위치: $(dirname "$(realpath "$0")")"
 
-while true
+# -----------------------------------
+# 1. 현재 Push한 Commit 확인
+# -----------------------------------
+
+COMMIT_SHA=$(git rev-parse HEAD)
+
+log "Push Commit: $COMMIT_SHA"
+
+
+# -----------------------------------
+# 2. 해당 Commit의 Actions 실행 찾기
+# -----------------------------------
+
+RUN_ID=""
+
+log "GitHub Actions 실행을 기다리는 중..."
+
+while [ -z "$RUN_ID" ]
 do
     RUN_ID=$(gh run list \
         --repo "$REPO" \
         --workflow "$WORKFLOW" \
+        --commit "$COMMIT_SHA" \
         --limit 1 \
         --json databaseId \
-        --jq '.[0].databaseId')
+        --jq '.[0].databaseId // empty')
 
     if [ -z "$RUN_ID" ]; then
-        echo "Actions 실행을 찾을 수 없습니다."
-        sleep 30
-        continue
+        log "아직 Actions 실행이 생성되지 않았습니다."
+        sleep 5
     fi
+done
 
-    # 이미 처리한 Run이면 넘어감
-    if [ "$RUN_ID" = "$LAST_RUN_ID" ]; then
-        sleep 30
-        continue
-    fi
+log "Actions 실행 발견"
+log "Run ID: $RUN_ID"
 
-    echo "새로운 Actions 실행 발견"
-    echo "Run ID: $RUN_ID"
 
+# -----------------------------------
+# 3. Actions 완료까지 대기
+# -----------------------------------
+
+while true
+do
     STATUS=$(gh run view "$RUN_ID" \
         --repo "$REPO" \
         --json status \
         --jq '.status')
 
-    # 아직 실행 중이면 다음 확인 때 다시 확인
-    if [ "$STATUS" != "completed" ]; then
-        echo "Actions 실행 중..."
-        sleep 30
-        continue
+    log "Actions 상태: $STATUS"
+
+    if [ "$STATUS" = "completed" ]; then
+        break
     fi
 
-    CONCLUSION=$(gh run view "$RUN_ID" \
-        --repo "$REPO" \
-        --json conclusion \
-        --jq '.conclusion')
-
-    echo "Actions 결과: $CONCLUSION"
-
-    if [ "$CONCLUSION" = "failure" ]; then
-
-        echo "테스트 실패 감지"
-        echo "로그 다운로드 중..."
-
-        rm -rf "$LOG_DIR"
-        mkdir -p "$LOG_DIR"
-
-        if gh run download "$RUN_ID" \
-            --repo "$REPO" \
-            --name test-logs \
-            --dir "$LOG_DIR"
-        then
-            echo "Artifact 다운로드 성공"
-
-            echo "현재 위치: $(pwd)"
-            echo "===== 다운로드된 파일 ====="
-            find "$LOG_DIR" -type f -print
-
-            if [ -f "$LOG_DIR/error.log" ]; then
-                cp "$LOG_DIR/error.log" "$ERROR_LOG"
-                echo "error.log 복사 완료"
-            fi
-
-            if [ -f "$LOG_DIR/analysis.log" ]; then
-                cp "$LOG_DIR/analysis.log" "$ANALYSIS_LOG"
-                echo "analysis.log 복사 완료"
-            fi
-
-            echo "로그 다운로드 완료"
-        else
-            echo "Artifact 다운로드 실패"
-            echo "다음 확인 때 다시 시도합니다."
-            sleep 30
-            continue
-        fi
-    fi
-
-    # 여기까지 정상적으로 처리한 경우에만 저장
-    echo "$RUN_ID" > "$STATE_FILE"
-    LAST_RUN_ID="$RUN_ID"
-
-    echo "처리 완료: $RUN_ID"
-    echo "-----------------------------------"
-
-    sleep 30
+    sleep 10
 done
+
+
+# -----------------------------------
+# 4. Actions 결과 확인
+# -----------------------------------
+
+CONCLUSION=$(gh run view "$RUN_ID" \
+    --repo "$REPO" \
+    --json conclusion \
+    --jq '.conclusion')
+
+log "Actions 결과: $CONCLUSION"
+
+
+# -----------------------------------
+# 5. 실패한 경우 로그 다운로드
+# -----------------------------------
+
+if [ "$CONCLUSION" = "failure" ]; then
+
+    log "테스트 실패 감지"
+    log "로그 다운로드 시작"
+
+    rm -rf "$LOG_DIR"
+    mkdir -p "$LOG_DIR"
+
+    if gh run download "$RUN_ID" \
+        --repo "$REPO" \
+        --name test-logs \
+        --dir "$LOG_DIR"
+    then
+
+        log "Artifact 다운로드 성공"
+
+        echo "===== 다운로드된 파일 ====="
+        find "$LOG_DIR" -type f -print
+
+
+        # error.log
+        if [ -f "$LOG_DIR/error.log" ]; then
+            cp "$LOG_DIR/error.log" "$ERROR_LOG"
+            log "error.log 복사 완료"
+        else
+            log "error.log를 찾을 수 없습니다."
+        fi
+
+
+        # analysis.log
+        if [ -f "$LOG_DIR/analysis.log" ]; then
+            cp "$LOG_DIR/analysis.log" "$ANALYSIS_LOG"
+            log "analysis.log 복사 완료"
+        else
+            log "analysis.log를 찾을 수 없습니다."
+        fi
+
+        log "로그 다운로드 완료"
+
+    else
+        log "Artifact 다운로드 실패"
+        exit 1
+    fi
+
+else
+
+    log "테스트가 실패하지 않았습니다."
+
+fi
+
+
+# -----------------------------------
+# 6. 종료
+# -----------------------------------
+
+log "==================================="
+log "Watcher 처리 완료"
+log "Run ID: $RUN_ID"
+log "==================================="
+
+exit 0
