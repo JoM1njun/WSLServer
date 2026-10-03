@@ -11,6 +11,12 @@ on:
       - main
       - develop
 
+env:
+  LANG: C.UTF-8
+  LC_ALL: C.UTF-8
+  PYTHONUTF8: "1"
+  PYTHONIOENCODING: utf-8
+
 jobs:
   test-and-analyze:
     runs-on: ubuntu-latest
@@ -66,7 +72,7 @@ jobs:
         run: |
           echo "========== SERVER TEST ==========" >> ../error.log
           set -o pipefail
-          npm test -- --run 2>&1 | tee -a ../error.log
+          npm test -- --run --reporter=verbose | tee -a ../error.log
 
       # -----------------------------
       # AI test
