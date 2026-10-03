@@ -17,7 +17,7 @@ def analyze_error(error_log):
 
     model = os.getenv(
         "GEMINI_MODEL",
-        "gemini03.8-flash"
+        "gemini-3.7-flash"
     )
 
     prompt = f"""
