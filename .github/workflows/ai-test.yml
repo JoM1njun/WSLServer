@@ -50,13 +50,30 @@ jobs:
       - name: Setup Python
         uses: actions/setup-python@v5
         with:
-          python-version: '3.12'
+          python-version: "3.12"
 
       - name: Install dependencies
         run: pip install -r requirements.txt
 
       - name: Train model
         run: python train_model.py
+
+      - name: Run tests
+        id: tests
+        continue-on-error: true
+        run: set -o pipefail
+          pytest 2>&1 | tee error.log
+
+      - name: Analyze test error
+        if: steps.tests.outcome == 'failure'
+        run: python analyze_error.py
+        env:
+          OPENAI_API_KEY: ${{ secrets.AI_API_KEY }}
+          OPENAI_MODEL: gemini-3.8-flash
+
+      - name: Check test result
+        if: steps.tests.outcome == 'failure'
+        run: exit 1
 
       - name: Run AI tests
         run: pytest
