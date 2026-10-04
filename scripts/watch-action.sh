@@ -30,7 +30,7 @@ log "==================================="
 # 1. 현재 Push한 Commit 확인
 # -----------------------------------
 
-COMMIT_SHA=$(git rev-parse HEAD)
+COMMIT_SHA="${1:-$(git rev-parse HEAD)}"
 
 log "Push Commit: $COMMIT_SHA"
 
@@ -129,7 +129,7 @@ then
     #     cp "$LOG_DIR/error.log" "$ERROR_LOG"
     #     log "error.log 복사 완료"
     # else
-    #     log "error.log를 찾을 수 없습니다."
+    #     log "error.log를 찾을 수 없습니다."r
     # fi
 
 
