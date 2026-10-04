@@ -1,5 +1,7 @@
 #!/bin/bash
 
+echo "WATCHER 실행됨" >> "$HOME/watcher-debug.log"
+
 set -u
 
 REPO="JoM1njun/WSLServer"
