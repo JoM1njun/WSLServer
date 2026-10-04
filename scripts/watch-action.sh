@@ -8,10 +8,11 @@ REPO="JoM1njun/WSLServer"
 WORKFLOW="AI Test Analysis"
 
 SCRIPT_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
+REPO_DIR="$(cd "$SCRIPT_DIR/.." && pwd)"
 
-LOG_DIR="$SCRIPT_DIR/.github-logs"
-ERROR_LOG="$SCRIPT_DIR/error.log"
-ANALYSIS_LOG="$SCRIPT_DIR/analysis.log"
+LOG_DIR="$REPO_DIR/.github-logs"
+ERROR_LOG="$LOG_DIR/error.log"
+ANALYSIS_LOG="$LOG_DIR/analysis.log"
 
 log() {
     echo "[$(TZ=Asia/Seoul date '+%Y-%m-%d %H:%M:%S KST')] $1"
@@ -124,24 +125,24 @@ then
     # error.log 복사
     # -----------------------------------
 
-    if [ -f "$LOG_DIR/error.log" ]; then
-        cp "$LOG_DIR/error.log" "$ERROR_LOG"
-        log "error.log 복사 완료"
-    else
-        log "error.log를 찾을 수 없습니다."
-    fi
+    # if [ -f "$LOG_DIR/error.log" ]; then
+    #     cp "$LOG_DIR/error.log" "$ERROR_LOG"
+    #     log "error.log 복사 완료"
+    # else
+    #     log "error.log를 찾을 수 없습니다."
+    # fi
 
 
     # -----------------------------------
     # analysis.log 복사
     # -----------------------------------
 
-    if [ -f "$LOG_DIR/analysis.log" ]; then
-        cp "$LOG_DIR/analysis.log" "$ANALYSIS_LOG"
-        log "analysis.log 복사 완료"
-    else
-        log "analysis.log를 찾을 수 없습니다."
-    fi
+    # if [ -f "$LOG_DIR/analysis.log" ]; then
+    #     cp "$LOG_DIR/analysis.log" "$ANALYSIS_LOG"
+    #     log "analysis.log 복사 완료"
+    # else
+    #     log "analysis.log를 찾을 수 없습니다."
+    # fi
 
 
     # -----------------------------------
