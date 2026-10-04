@@ -47,10 +47,11 @@ do
     RUN_ID=$(gh run list \
         --repo "$REPO" \
         --workflow "$WORKFLOW" \
-        --commit "$COMMIT_SHA" \
-        --limit 1 \
-        --json databaseId \
-        --jq '.[0].databaseId // empty')
+        --limit 20 \
+        --json databaseId,headSha \
+        --jq ".[] | select(.headSha == \"$COMMIT_SHA\") | .databaseId" \
+        | head -n 1
+        )
 
     if [ -z "$RUN_ID" ]; then
         log "아직 Actions 실행이 생성되지 않았습니다."
