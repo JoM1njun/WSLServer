@@ -1,2 +1,2 @@
 hook test
-test
+testhooks test 4
