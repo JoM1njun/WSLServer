@@ -1,3 +1,4 @@
 hook test
 testhooks test 4
 hooks test 5
+hook test
