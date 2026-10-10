@@ -63,7 +63,8 @@ jobs:
       # -----------------------------
       - name: Initialize error log
         run: |
-          : > error.log
+          mkdir -p .github-logs
+          : > .github-logs/error.log
 
       # -----------------------------
       # Server test
@@ -73,15 +74,15 @@ jobs:
         continue-on-error: true
         working-directory: server
         run: |
-          echo "===================================" >> ../error.log
-          echo "SERVER TEST" >> ../error.log
-          echo "Started At: $(date '+%Y-%m-%d %H:%M:%S %Z')" >> ../error.log
-          echo "===================================" >> ../error.log
+          echo "===================================" >> ../.github-logs/error.log
+          echo "SERVER TEST" >> ../.github-logs/error.log
+          echo "Started At: $(date '+%Y-%m-%d %H:%M:%S %Z')" >> ../.github-logs/error.log
+          echo "===================================" >> ../.github-logs/error.log
 
           set -o pipefail
-          npm test -- --run --reporter=verbose | tee -a ../error.log
+          npm test -- --run --reporter=verbose | tee -a ../.github-logs/error.log
 
-          echo "Finished At: $(date '+%Y-%m-%d %H:%M:%S %Z')" >> ../error.log
+          echo "Finished At: $(date '+%Y-%m-%d %H:%M:%S %Z')" >> ../.github-logs/error.log
 
       # -----------------------------
       # AI test
