@@ -8,10 +8,11 @@ from google.genai import errors
 
 MAX_RETRIES = 3
 
-ROOT_DIR = Path(__file__).resolve().parent.parent
+ROOT_DIR = Path(__file__).resolve().parents[2]
+LOG_DIR = ROOT_DIR / ".github-logs"
 
-ERROR_LOG = ROOT_DIR / "error.log"
-ANALYSIS_LOG = ROOT_DIR / "analysis.log"
+ERROR_LOG = LOG_DIR / "error.log"
+ANALYSIS_LOG = LOG_DIR / "analysis.log"
 
 KST = timezone(timedelta(hours=9))
 
@@ -109,6 +110,8 @@ def request_gemini(client, model, prompt):
 def main():
     started_at = datetime.now(KST).strftime("%Y-%m-%d %H:%M:%S KST")
     finished_at = datetime.now(KST).strftime("%Y-%m-%d %H:%M:%S KST")
+
+    LOG_DIR.mkdir(parents=True, exist_ok=True)
 
     if not ERROR_LOG.exists():
         print(f"error.log 파일을 찾을 수 없습니다: {ERROR_LOG}")
