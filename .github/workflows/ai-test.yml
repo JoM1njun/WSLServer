@@ -25,6 +25,9 @@ jobs:
     steps:
       - name: Checkout repository
         uses: actions/checkout@v4
+        with:
+          ref: ${{ github.event.pull_request.head.sha || github.sha }}
+          fetch-depth: 0
 
       # -----------------------------
       # Node.js
@@ -100,11 +103,26 @@ jobs:
           echo "Finished At: $(date '+%Y-%m-%d %H:%M:%S %Z')" >> ../error.log
 
       # -----------------------------
+      # AI Code Review
+      # -----------------------------
+      - name: Collect changed code
+        env:
+          BASE_SHA: ${{ github.event_name == 'pull_request' && github.event.pull_request.base.sha || github.event.before }}
+          HEAD_SHA: ${{ github.event_name == 'pull_request' && github.event.pull_request.head.sha || github.sha }}
+        run: python automation/collect_changes.py
+
+      - name: AI Code Review
+        env:
+          AI_API_KEY: ${{ secrets.AI_API_KEY }}
+          GEMINI_MODEL: gemini-3.8-flash
+        run: python automation/ai_code_review.py
+
+      # -----------------------------
       # Gemini analysis
       # -----------------------------
       - name: Analyze test error
         if: steps.server_tests.outcome == 'failure' || steps.ai_tests.outcome == 'failure'
-        run: python ai/analyze_error.py
+        run: python ai/automation/analyze_error.py
         env:
           AI_API_KEY: ${{ secrets.AI_API_KEY }}
           GEMINI_MODEL: gemini-3.8-flash
@@ -127,4 +145,5 @@ jobs:
           path: |
             error.log
             analysis.log
+            code_review.log
           if-no-files-found: warn
