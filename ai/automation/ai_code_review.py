@@ -266,6 +266,13 @@ def main():
     finished_at = started_at
 
     data = None
+
+    LOG_DIR.mkdir(parents=True, exist_ok=True)
+
+    print(f"ROOT_DIR: {ROOT_DIR}")
+    print(f"LOG_DIR: {LOG_DIR}")
+    print(f"OUTPUT_FILE: {OUTPUT_FILE}")
+    print(f"LOG_DIR exists: {LOG_DIR.exists()}")
     
     try:
         data = load_changes()
