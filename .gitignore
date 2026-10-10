@@ -8,3 +8,5 @@ ai/risk_model.pkl
 .github-logs/
 error.log
 analysis.log
+# AI Code Review Output
+change_context.json
