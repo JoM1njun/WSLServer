@@ -20,7 +20,7 @@ FALLBACK_MODEL = (
     else "gemini-3.8-flash"
 )
 
-ROOT_DIR = Path(__file__).resolve().parent.parent
+ROOT_DIR = Path(__file__).resolve().parents[2]
 LOG_DIR = ROOT_DIR / ".github-logs"
 
 INPUT_FILE = ROOT_DIR / "change_context.json"
