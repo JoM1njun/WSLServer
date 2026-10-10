@@ -142,7 +142,7 @@ jobs:
         with:
           name: test-logs
           path: |
-            error.log
-            analysis.log
-            code_review.log
+            .github-logs/error.log
+            .github-logs/analysis.log
+            .github-logs/code_review.log
           if-no-files-found: warn

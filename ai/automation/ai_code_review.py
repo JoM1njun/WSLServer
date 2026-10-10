@@ -1,4 +1,3 @@
-
 import json
 import os
 import time
@@ -22,8 +21,10 @@ FALLBACK_MODEL = (
 )
 
 ROOT_DIR = Path(__file__).resolve().parent.parent
+LOG_DIR = ROOT_DIR / ".github-logs"
+
 INPUT_FILE = ROOT_DIR / "change_context.json"
-OUTPUT_FILE = ROOT_DIR / "code_review.log"
+OUTPUT_FILE = LOG_DIR / "code_review.log"
 
 KST = timezone(timedelta(hours=9))
 
