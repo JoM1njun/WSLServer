@@ -4,12 +4,11 @@ on:
   push:
     branches:
       - main
-      - develop
+      - feature/ai-code-review
 
   pull_request:
     branches:
       - main
-      - develop
 
 env:
   TZ: Asia/Seoul
