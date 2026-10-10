@@ -4,7 +4,7 @@ import re
 import subprocess
 from pathlib import Path
 
-ROOT_DIR = Path(__file__).resolve().parent.parent
+ROOT_DIR = Path(__file__).resolve().parents[2]
 OUTPUT_FILE = ROOT_DIR / "change_context.json"
 
 MAX_FILE_CHARS = 30_000

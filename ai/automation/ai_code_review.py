@@ -263,6 +263,7 @@ def build_prompt(data):
 
 def main():
     started_at = datetime.now(KST).strftime("%Y-%m-%d %H:%M:%S KST")
+    finished_at = started_at
 
     data = None
     
